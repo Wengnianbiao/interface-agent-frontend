@@ -68,14 +68,6 @@
             <el-button size="small" type="warning" @click="exportNodeParams(scope.row)">导出参数配置</el-button>
             <el-button size="small" type="primary" @click="handleImportClick(scope.row)">导入参数配置</el-button>
           </div>
-          <!-- 文件上传组件，默认隐藏 -->
-          <input
-            type="file"
-            ref="fileInput"
-            style="display: none"
-            accept=".json"
-            @change="handleFileUpload($event)"
-          >
         </template>
       </el-table-column>
     </el-table>
@@ -111,7 +103,6 @@
         ref="form"
         label-width="120px"
       >
-
         <el-form-item label="节点名称" prop="nodeName">
           <el-input v-model="form.nodeName" placeholder="请输入节点名称"></el-input>
         </el-form-item>
@@ -142,20 +133,12 @@
           </el-select>
         </el-form-item>
 
-        <!-- 调度表达式 -->
         <el-form-item label="调度表达式" prop="scheduleExpr">
-          <el-input 
-            v-model="form.scheduleExpr" 
-            placeholder="请输入调度表达式"
-          ></el-input>
+          <el-input v-model="form.scheduleExpr" placeholder="请输入调度表达式"></el-input>
         </el-form-item>
 
-        <!-- 参数过滤表达式 -->
         <el-form-item label="参数过滤表达式" prop="paramFilterExpr">
-          <el-input 
-            v-model="form.paramFilterExpr" 
-            placeholder="请输入参数过滤表达式"
-          ></el-input>
+          <el-input v-model="form.paramFilterExpr" placeholder="请输入参数过滤表达式"></el-input>
         </el-form-item>
 
         <el-form-item label="节点元数据信息" prop="metaInfo">
@@ -221,16 +204,16 @@ export default {
       filterFlowId: null,
       form: {
         nodeId: '',
-        nodeName: '',
+        节点名称: '',
         flowId: '',
         nodeType: 'HTTP',
         metaInfo: '{}',
-        scheduleParamSourceType: '', 
+        scheduleParamSourceType: '',
         scheduleExpr: '',
         paramFilterExpr: ''
       },
       rules: {
-        nodeName: [
+        节点名称: [
           { required: true, message: '请输入节点名称', trigger: 'blur' }
         ],
         flowId: [
@@ -254,8 +237,8 @@ export default {
         pageNum: 1,
         pageSize: 10
       },
-      currentNode: null,  // 用于存储当前要导入的节点信息
-      
+      currentNode: null,
+
       // JSON弹窗相关
       jsonDialogVisible: false,
       jsonDialogTitle: '',
@@ -268,7 +251,6 @@ export default {
     this.fetchWorkflows();
   },
   methods: {
-    // 校验JSON格式
     validateJson(rule, value, callback) {
       try {
         JSON.parse(value);
@@ -278,9 +260,7 @@ export default {
       }
     },
 
-    // 校验调度表达式
     validateScheduleExpr(rule, value, callback) {
-      // 可根据实际需求添加调度表达式的校验规则
       callback();
     },
 
@@ -291,7 +271,6 @@ export default {
           pageNum: this.pagination.pageNum,
           pageSize: this.pagination.pageSize
         };
-        
         if (this.filterFlowId) {
           params.flowId = this.filterFlowId;
         }
@@ -331,62 +310,50 @@ export default {
       }
     },
 
-    // 根据flowId获取工作流名称
     getFlowName(flowId) {
       return this.flowIdToNameMap.get(flowId) || '未知';
     },
 
-    // 筛选变更处理
     handleFilterChange() {
       this.pagination.pageNum = 1;
       this.fetchNodes();
     },
 
-    // 重置筛选条件
     resetFilters() {
       this.filterFlowId = null;
       this.pagination.pageNum = 1;
       this.fetchNodes();
     },
 
-    // 新增节点
     handleAdd() {
       this.resetForm();
       this.dialogTitle = '新增节点';
       this.dialogVisible = true;
     },
 
-    // 编辑节点
     handleEdit(row) {
       this.form = JSON.parse(JSON.stringify(row));
       this.dialogTitle = '编辑节点';
       this.dialogVisible = true;
     },
 
-    // 复制节点 
     handleCopy(row) {
       const copied = JSON.parse(JSON.stringify(row));
-      // 清除原节点ID，避免冲突
       copied.nodeId = '';
-      // 修改节点名称，添加"副本"标识
       copied.nodeName = `${copied.nodeName}（副本）`;
-      // 清除原flowId，强制用户重新选择，解决冲突
       copied.flowId = '';
-      // 清空可能与原工作流绑定的相关配置
       copied.scheduleExpr = '';
       copied.paramFilterExpr = '';
-      
+
       this.form = copied;
       this.dialogTitle = '复制节点';
       this.dialogVisible = true;
-      
-      // 显示提示信息，告知用户需要重新选择工作流
+
       this.$nextTick(() => {
         this.$message.warning('复制节点需重新选择所属工作流');
       });
     },
 
-    // 删除节点
     handleDelete(row) {
       this.$confirm(`确定要删除节点 "${row.nodeName}" 吗?`, '提示', {
         confirmButtonText: '确定',
@@ -403,9 +370,6 @@ export default {
       }).catch(() => {});
     },
 
-    /**
-     * 导出节点参数配置
-     */
     async exportNodeParams(row) {
       if (!row.nodeId) {
         this.$message.error('节点ID不存在，无法导出参数配置');
@@ -418,18 +382,16 @@ export default {
 
         if (response.status !== 200 || response.data.code !== '200') {
           const errorMsg = response.data?.message || '导出接口响应异常';
-          this.$message.error(`参数配置导出失败: ${errorMsg}`);
+          this.$message.error(`参数配置导出失败: ${ errorMsg }`);
           return;
         }
 
-        // 获取导出数据
         const exportData = response.data.rsp;
         if (!exportData) {
           this.$message.info('该节点没有参数配置数据');
           return;
         }
 
-        // 转换为JSON并创建下载文件
         const dataStr = JSON.stringify(exportData, null, 2);
         const blob = new Blob([dataStr], { type: 'application/json; charset=utf-8' });
         const url = URL.createObjectURL(blob);
@@ -440,55 +402,47 @@ export default {
         document.body.appendChild(link);
         link.click();
 
-        // 清理资源
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
         this.$message.success('参数配置导出成功');
-
       } catch (error) {
         const errorMsg = error?.message || '未知错误';
-        this.$message.error(`参数配置导出失败: ${errorMsg}`);
+        this.$message.error(`参数配置导出失败: ${ errorMsg }`);
       } finally {
         this.loading = false;
       }
     },
 
-    // 点击导入按钮 - 记录当前节点信息
+    // ✅ 修复：动态创建 input 元素，避免分页失效
     handleImportClick(row) {
-      this.currentNode = row;  // 保存当前要导入的节点信息
-      this.$refs.fileInput.click();
+      this.currentNode = row;
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = '.json';
+      fileInput.onchange = (e) => {
+        if (e.target.files.length > 0) {
+          this.handleFileUpload(e);
+        }
+      };
+      fileInput.click();
     },
 
-    // 处理文件上传 - 使用保存的当前节点ID
+    // ✅ 处理文件上传（适配动态 input）
     async handleFileUpload(event) {
-      // 检查是否有选中的节点
-      if (!this.currentNode || !this.currentNode.nodeId) {
-        this.$message.error('未找到有效的节点信息');
-        event.target.value = '';
-        return;
-      }
-
       const file = event.target.files[0];
-      if (!file) {
-        return;
-      }
+      if (!file) return;
 
-      // 验证文件类型
       if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
         this.$message.error('请上传JSON格式的文件');
-        event.target.value = '';
         return;
       }
 
       try {
         this.loading = true;
-        
-        // 创建FormData对象，使用当前节点的ID
         const formData = new FormData();
-        formData.append('nodeId', this.currentNode.nodeId);  // 使用保存的当前节点ID
+        formData.append('nodeId', this.currentNode.nodeId);
         formData.append('file', file);
-        
-        // 调用导入接口
+
         const response = await request.post('/v1/console/node/import', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
@@ -504,30 +458,26 @@ export default {
         this.$message.error('参数配置导入失败: ' + error.message);
       } finally {
         this.loading = false;
-        event.target.value = '';
-        this.currentNode = null;  // 清空当前节点引用
       }
     },
 
-    // 重置表单
     resetForm() {
       this.$refs.form?.resetFields();
       this.form = {
         nodeId: '',
-        nodeName: '',
+        节点名称: '',
         flowId: '',
         nodeType: 'HTTP',
         metaInfo: '{}',
+        scheduleParamSourceType: '',
         scheduleExpr: '',
-        scheduleParamSourceType: ''
+        paramFilterExpr: ''
       };
     },
 
-    // 提交表单（新增：空字符串转null）
     submitForm() {
       this.$refs.form.validate(async (valid) => {
         if (valid) {
-          // 预处理：将空字符串字段转为null
           const submitData = { ...this.form };
           Object.keys(submitData).forEach(key => {
             if (submitData[key] === '') {
@@ -538,10 +488,8 @@ export default {
           try {
             let response;
             if (this.form.nodeId) {
-              // 更新节点
               response = await request.post('/v1/console/node/update', submitData);
             } else {
-              // 创建节点
               response = await request.post('/v1/console/node/create', submitData);
             }
 
@@ -559,55 +507,43 @@ export default {
       });
     },
 
-    // 分页大小变更
     handleSizeChange(val) {
       this.pagination.pageSize = val;
       this.pagination.pageNum = 1;
       this.fetchNodes();
     },
 
-    // 当前页变更
     handleCurrentChange(val) {
       this.pagination.pageNum = val;
       this.fetchNodes();
     },
 
-    // 格式化列表中的JSON预览（限制显示行数）
     formatJsonPreview(str) {
       try {
         if (!str) return '无数据';
-        
         const obj = JSON.parse(str);
         const formatted = JSON.stringify(obj, null, 2);
         const lines = formatted.split('\n');
-        
-        // 只显示前3行，超过的用省略号表示
         if (lines.length > 3) {
           return [...lines.slice(0, 3), '  ...'].join('\n');
         }
         return formatted;
       } catch (e) {
-        // 不是JSON格式的字符串，直接显示前100个字符
         return str.length > 100 ? str.substring(0, 100) + '...' : str;
       }
     },
 
-    // 打开JSON弹窗
     openJsonDialog(jsonStr, title) {
       this.jsonDialogTitle = title;
       this.currentJson = jsonStr || '';
-      
-      // 解析JSON
       try {
         this.parsedJson = jsonStr ? JSON.parse(jsonStr) : null;
       } catch (e) {
         this.parsedJson = { error: 'Invalid JSON format', content: jsonStr };
       }
-      
       this.jsonDialogVisible = true;
     },
 
-    // 复制JSON到剪贴板
     copyJson() {
       navigator.clipboard.writeText(this.currentJson || '')
         .then(() => {
@@ -618,7 +554,6 @@ export default {
         });
     },
 
-    // 重置JSON弹窗
     resetJsonDialog() {
       this.parsedJson = null;
       this.currentJson = '';
@@ -648,19 +583,16 @@ export default {
   text-overflow: ellipsis;
 }
 
-/* 为调度参数类型标签添加样式区分 */
 ::v-deep .el-tag--info {
   background-color: #e8f4fd;
   color: #1890ff;
 }
 
-/* JSON容器样式 */
 .json-container {
   position: relative;
   cursor: pointer;
 }
 
-/* 列表中的JSON预览样式 */
 .json-preview {
   white-space: pre-wrap;
   word-wrap: break-word;
@@ -680,7 +612,6 @@ export default {
   background-color: #eee;
 }
 
-/* 悬浮提示层 */
 .json-overlay {
   position: absolute;
   top: 0;
@@ -702,7 +633,6 @@ export default {
   opacity: 1;
 }
 
-/* JSON详情弹窗样式 */
 .json-detail-container {
   max-height: 60vh;
   overflow: auto;
@@ -710,7 +640,6 @@ export default {
   background-color: #fff;
 }
 
-/* 左对齐JSON样式 */
 .left-aligned-json {
   text-align: left !important;
   padding: 0 !important;
