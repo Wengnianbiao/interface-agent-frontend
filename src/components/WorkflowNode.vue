@@ -135,12 +135,10 @@
           </el-select>
         </el-form-item>
 
-        <!-- 调度参数类型（枚举值） -->
         <el-form-item label="调度参数类型" prop="scheduleParamSourceType">
-          <el-select v-model="form.scheduleParamSourceType" placeholder="请选择调度参数类型">
+          <el-select v-model="form.scheduleParamSourceType" placeholder="请选择调度参数类型" clearable>
             <el-option label="原始入参" value="ORIGINAL"></el-option>
-            <el-option label="上游节点入参" value="PREV_INPUT"></el-option>
-            <el-option label="当前节点出参" value="CURRENT_OUTPUT"></el-option>
+            <el-option label="上个节点响应" value="PRE_RESPONSE"></el-option>
           </el-select>
         </el-form-item>
 
@@ -196,7 +194,7 @@ export default {
         flowId: '',
         nodeType: 'HTTP',
         metaInfo: '{}',
-        scheduleParamSourceType: '',
+        scheduleParamSourceType: '', 
         scheduleExpr: '',
         paramFilterExpr: ''
       },
@@ -328,7 +326,7 @@ export default {
       this.dialogVisible = true;
     },
 
-    // 复制节点 - 修复flowId冲突问题
+    // 复制节点 
     handleCopy(row) {
       const copied = JSON.parse(JSON.stringify(row));
       // 清除原节点ID，避免冲突
@@ -370,7 +368,6 @@ export default {
 
     /**
      * 导出节点参数配置
-     * 适配API：GET /v1/console/node/export/{nodeId}
      */
     async exportNodeParams(row) {
       if (!row.nodeId) {
@@ -380,7 +377,6 @@ export default {
 
       try {
         this.loading = true;
-        // 调用新的导出API
         const response = await request.get(`/v1/console/node/export/${row.nodeId}`);
 
         if (response.status !== 200 || response.data.code !== '200') {
@@ -490,18 +486,26 @@ export default {
       };
     },
 
-    // 提交表单
+    // 提交表单（新增：空字符串转null）
     submitForm() {
       this.$refs.form.validate(async (valid) => {
         if (valid) {
+          // 预处理：将空字符串字段转为null
+          const submitData = { ...this.form };
+          Object.keys(submitData).forEach(key => {
+            if (submitData[key] === '') {
+              submitData[key] = null;
+            }
+          });
+
           try {
             let response;
             if (this.form.nodeId) {
               // 更新节点
-              response = await request.post('/v1/console/node/update', this.form);
+              response = await request.post('/v1/console/node/update', submitData);
             } else {
               // 创建节点
-              response = await request.post('/v1/console/node/create', this.form);
+              response = await request.post('/v1/console/node/create', submitData);
             }
 
             if (response.status === 200 && response.data.code === '200') {
