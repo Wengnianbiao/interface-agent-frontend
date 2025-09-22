@@ -44,11 +44,11 @@ export function updateWorkflow(data) {
 }
 
 /**
- * 获取所有参数配置（用于导出）
+ * 获取所有接口节点（无分页）
  */
-export function getNodeParamsUnpaged() {
+export function getAllNodes() {
   return request({
-    url: '/v1/console/node-param/all-unpaged',
+    url: '/v1/console/node/all-unpaged',
     method: 'get'
   })
 }

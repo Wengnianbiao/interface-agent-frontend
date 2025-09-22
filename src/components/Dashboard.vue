@@ -1,7 +1,6 @@
-<!-- src/components/Dashboard.vue -->
 <template>
   <div class="dashboard">
-    <p>欢迎使用可配置接口后台</p>
+    <p>欢迎使用接口可配置后台</p>
   </div>
 </template>
 

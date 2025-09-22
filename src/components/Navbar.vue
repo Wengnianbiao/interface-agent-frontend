@@ -21,9 +21,9 @@
           <span>工作流管理</span>
         </template>
         <el-menu-item index="2-1">工作流管理</el-menu-item>
-        <el-menu-item index="2-2">节点管理</el-menu-item>
-        <el-menu-item index="2-3">节点参数配置管理</el-menu-item>
-        <el-menu-item index="2-4">接口调用日志</el-menu-item> <!-- 新增接口调用日志 -->
+        <el-menu-item index="2-2">接口管理</el-menu-item>
+        <el-menu-item index="2-3">接口参数配置管理</el-menu-item>
+        <el-menu-item index="2-4">接口调用日志</el-menu-item>
       </el-submenu>
       <el-menu-item index="3">
         <i class="el-icon-setting"></i>
@@ -74,7 +74,7 @@ export default {
             this.$router.push('/workflow/node/param/config');
           }
           break;
-        case '2-4': // 新增接口调用日志路由
+        case '2-4':
           if (currentPath !== '/invoke/log') {
             this.$router.push('/invoke/log');
           }

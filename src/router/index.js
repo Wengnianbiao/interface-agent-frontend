@@ -10,7 +10,7 @@ Vue.use(VueRouter);
 const routes = [
   {
     path: '/',
-    name: 'SystemDashboard', 
+    name: 'Dashboard', 
     component: () => import('@/components/Dashboard.vue')
   },
   {
@@ -29,7 +29,7 @@ const routes = [
     component: () => import('@/components/NodeParamConfig.vue')
   },
   {
-    path: '/invoke/log', // 新增路由
+    path: '/invoke/log', 
     name: 'InvokeLog',
     component: InvokeLog
   }

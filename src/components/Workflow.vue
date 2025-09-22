@@ -1,6 +1,6 @@
 <template>
   <div class="workflow-list">
-    <h2>接口工作流</h2>
+    <h2>工作流管理</h2>
 
     <!-- 操作按钮区 -->
     <div style="margin-bottom: 10px; text-align: right;">
@@ -9,10 +9,10 @@
 
     <!-- 工作流表格 -->
     <el-table 
-    :data="workflows" 
-    style="width: 100%" 
-    v-loading="loading" 
-    fit="true"
+      :data="workflows" 
+      style="width: 100%" 
+      v-loading="loading" 
+      fit="true"
     >
       <el-table-column prop="flowName" label="工作流名称" min-width="200"></el-table-column>
       <el-table-column prop="interfaceUri" label="接口URI" min-width="250"></el-table-column>
@@ -81,7 +81,10 @@
         </el-form-item>
 
         <el-form-item label="入参类型" prop="contentType">
-          <el-input v-model="form.contentType" placeholder="请输入入参类型"></el-input>
+          <el-select v-model="form.contentType" placeholder="请选择入参类型">
+            <el-option label="JSON" value="JSON"></el-option>
+            <el-option label="XML" value="XML"></el-option>
+          </el-select>
         </el-form-item>
 
         <el-form-item label="入参元信息" prop="contentMateInfo">
@@ -126,7 +129,7 @@
 </template>
 
 <script>
-import request from '@/utils/request';
+import { getWorkflows, getAllNodes, createWorkflow, updateWorkflow, deleteWorkflow } from '@/api/workflow';
 
 export default {
   name: 'WorkFlowList',
@@ -144,7 +147,7 @@ export default {
       form: {
         flowName: '',
         interfaceUri: '',
-        contentType: '',
+        contentType: 'JSON', // 默认值设为JSON
         contentMateInfo: '',
         firstFlowNodes: [],
         status: 1
@@ -157,7 +160,13 @@ export default {
           { required: true, message: '请输入接口URI', trigger: 'blur' }
         ],
         contentType: [
-          { required: true, message: '请输入入参类型', trigger: 'blur' }
+          { required: true, message: '请选择入参类型', trigger: 'change' },
+          { 
+            type: 'enum', 
+            enum: ['JSON', 'XML'], 
+            message: '入参类型只能是 JSON 或 XML', 
+            trigger: 'change' 
+          }
         ],
         firstFlowNodes: [
           { required: true, message: '请选择首节点', trigger: 'change' }
@@ -165,7 +174,6 @@ export default {
       },
       nodeOptions: [], // 节点列表，用于下拉选择
       nodeMap: new Map(), // 节点ID到名称的映射
-      // 新增：用于保存当前编辑的工作流ID
       currentEditingFlowId: null
     };
   },
@@ -180,8 +188,7 @@ export default {
           pageNum: this.pagination.pageNum,
           pageSize: this.pagination.pageSize
         };
-
-        const response = await request.get('/v1/console/workflow/all', { params });
+        const response = await getWorkflows(params);        
         
         if (response.status === 200 && response.data.code === '200') {
           const pageList = response.data.rsp;
@@ -216,7 +223,7 @@ export default {
 
     async fetchNodeList() {
       try {
-        const response = await request.get('/v1/console/node/all-unpaged');
+        const response = await getAllNodes();
         if (response.status === 200 && response.data.code === '200') {
           this.nodeOptions = response.data.rsp || [];
           // 构建节点ID到名称的映射
@@ -277,7 +284,7 @@ export default {
         type: 'warning'
       }).then(async () => {
         try {
-          await request.delete(`/v1/console/workflow/delete/${row.flowId}`);
+          await deleteWorkflow(row.flowId);
           this.$message.success('删除成功');
           this.fetchWorkflows();
         } catch (error) {
@@ -291,7 +298,7 @@ export default {
       this.form = {
         flowName: '',
         interfaceUri: '',
-        contentType: '',
+        contentType: 'JSON', // 重置时默认JSON
         contentMateInfo: '',
         firstFlowNodes: [],
         status: 1
@@ -312,13 +319,13 @@ export default {
                 ...this.form,
                 flowId: this.currentEditingFlowId
               };
-              response = await request.post('/v1/console/workflow/update', formData);
+              response = await updateWorkflow(formData);
             } else {
               // 新增或复制：使用POST创建
               const formData = {
                 ...this.form
               };
-              response = await request.post('/v1/console/workflow/create', formData);
+              response = await createWorkflow(formData);
             }
 
             if (response.status === 200 && response.data.code === '200') {
