@@ -545,13 +545,47 @@ export default {
     },
 
     copyJson() {
-      navigator.clipboard.writeText(this.currentJson || '')
-        .then(() => {
-          this.$message.success('已复制到剪贴板');
-        })
-        .catch(err => {
-          this.$message.error('复制失败：' + err.message);
-        });
+      const text = this.currentJson || '';
+      if (!text) {
+        this.$message.warning('无内容可复制');
+        return;
+      }
+
+      // 尝试使用 navigator.clipboard（现代浏览器）
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        navigator.clipboard.writeText(text)
+          .then(() => {
+            this.$message.success('已复制到剪贴板');
+          })
+          .catch(err => {
+            console.error('Clipboard error:', err);
+            // 如果失败，尝试 fallback 到 execCommand
+            this.fallbackCopy(text);
+          });
+      } else {
+        // Fallback to execCommand（兼容旧浏览器）
+        this.fallbackCopy(text);
+      }
+    },
+
+    fallbackCopy(text) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.top = '0';
+      textarea.style.left = '0';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        this.$message.success('已复制到剪贴板');
+      } catch (err) {
+        this.$message.error('复制失败，请手动复制');
+      }
+
+      document.body.removeChild(textarea);
     },
 
     resetJsonDialog() {

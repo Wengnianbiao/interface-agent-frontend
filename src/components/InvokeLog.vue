@@ -151,7 +151,6 @@ export default {
       dialogTitle: '',
       currentJson: '',
       parsedJson: null, // 解析后的JSON对象
-      jsonTheme: 'my-awesome-theme', // 自定义主题名称
       // 节点数据
       nodeOptions: [],
       nodeMap: new Map()
@@ -280,15 +279,55 @@ export default {
       this.jsonDialogVisible = true;
     },
 
-    // 复制JSON到剪贴板
+    // ✅ 修复：增强兼容性的复制方法（参考 WorkflowNode）
     copyJson() {
-      navigator.clipboard.writeText(this.currentJson || '')
-        .then(() => {
+      const text = this.currentJson || '';
+      if (!text) {
+        this.$message.warning('无内容可复制');
+        return;
+      }
+
+      // 尝试使用 navigator.clipboard（现代浏览器）
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        navigator.clipboard.writeText(text)
+          .then(() => {
+            this.$message.success('已复制到剪贴板');
+          })
+          .catch(err => {
+            console.warn('Clipboard API failed:', err);
+            // Fallback to execCommand
+            this.fallbackCopy(text);
+          });
+      } else {
+        // Fallback to execCommand（兼容旧浏览器）
+        this.fallbackCopy(text);
+      }
+    },
+
+    // ✅ Fallback 方法：创建 textarea 并执行 copy
+    fallbackCopy(text) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.top = '0';
+      textarea.style.left = '0';
+      textarea.style.opacity = '0';
+      textarea.style.fontSize = '12px';
+      document.body.appendChild(textarea);
+
+      try {
+        textarea.select();
+        const successful = document.execCommand('copy');
+        if (successful) {
           this.$message.success('已复制到剪贴板');
-        })
-        .catch(err => {
-          this.$message.error('复制失败：' + err.message);
-        });
+        } else {
+          this.$message.error('复制失败，请手动复制');
+        }
+      } catch (err) {
+        this.$message.error('复制失败，请手动复制');
+      }
+
+      document.body.removeChild(textarea);
     },
 
     // 重置JSON弹窗
@@ -384,127 +423,10 @@ export default {
   background-color: #fff; /* 确保背景为白色 */
 }
 
-/* 左对齐JSON样式 */
 .left-aligned-json {
   text-align: left !important;
   padding: 0 !important;
   margin: 0 !important;
 }
-
-/* 分页样式 */
-::v-deep .el-pagination {
-  margin-top: 20px;
-  text-align: right;
-}
-
-/* 空数据提示 */
-.empty-tip {
-  text-align: center;
-  padding: 50px 0;
-  color: #999;
-}
-
-/* 自定义JSON Viewer主题 - 更接近您提供的参考样式 */
-::v-deep .my-awesome-theme {
-  background: #fff;
-  padding: 10px 0; /* 移除左右内边距，增强左对齐效果 */
-}
-
-::v-deep .my-awesome-theme .jv-ellipsis {
-  color: #999;
-}
-
-::v-deep .my-awesome-theme .jv-ellipsis::after {
-  content: '...';
-}
-
-/* 键名样式 - 改为紫色 */
-::v-deep .my-awesome-theme .jv-key {
-  color: #800080; /* 紫色 */
-  font-weight: normal;
-  font-size: 15px; /* 增大字体 */
-}
-
-/* 字符串值样式 */
-::v-deep .my-awesome-theme .jv-string {
-  color: #008000;
-  font-size: 15px; /* 增大字体 */
-}
-
-/* 数字样式 */
-::v-deep .my-awesome-theme .jv-number {
-  color: #FF0000;
-  font-size: 15px; /* 增大字体 */
-}
-
-/* 布尔值样式 */
-::v-deep .my-awesome-theme .jv-boolean {
-  color: #0000CD;
-  font-size: 15px; /* 增大字体 */
-}
-
-::v-deep .my-awesome-theme .jv-null {
-  color: #999;
-  font-size: 15px; /* 增大字体 */
-}
-
-::v-deep .my-awesome-theme .jv-array-index {
-  color: #666;
-  font-weight: bold;
-  font-size: 15px; /* 增大字体 */
-}
-
-::v-deep .my-awesome-theme .jv-code {
-  padding: 0;
-  line-height: 1.5;
-  font-family: Consolas, Monaco, 'Andale Mono', monospace;
-  font-size: 15px; /* 增大整体字体大小 */
-}
-
-/* 优化折叠/展开按钮样式 */
-::v-deep .my-awesome-theme .jv-toggle {
-  color: #000;
-  cursor: pointer;
-  margin-right: 6px;
-  font-size: 14px;
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  text-align: center;
-  line-height: 14px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-  background-color: #f5f5f5;
-}
-
-/* 展开/折叠图标 */
-::v-deep .my-awesome-theme .jv-toggle.jv-toggle-closed::before {
-  content: '+';
-}
-
-::v-deep .my-awesome-theme .jv-toggle.jv-toggle-open::before {
-  content: '-';
-}
-
-::v-deep .my-awesome-theme .jv-toggle:hover {
-  background-color: #e0e0e0;
-  border-color: #999;
-}
-
-/* 移除JSON Viewer自带的缩进样式，使用自定义缩进 */
-::v-deep .my-awesome-theme .jv-indent {
-  display: inline-block;
-  margin: 0;
-  padding: 0;
-}
-
-::v-deep .my-awesome-theme .jv-level {
-  margin-left: 20px; /* 统一缩进量 */
-}
-
-/* 根节点样式 */
-::v-deep .my-awesome-theme .jv-root {
-  margin-left: 0 !important;
-  padding-left: 0 !important;
-}
 </style>
+
