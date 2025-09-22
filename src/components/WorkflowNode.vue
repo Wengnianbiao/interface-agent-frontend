@@ -45,16 +45,16 @@
           <el-tag size="small">{{ scope.row.nodeType }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="节点元数据信息" show-overflow-tooltip>
+      <el-table-column label="节点元数据信息" show-overflow-tooltip header-align="center">
         <template #default="scope">
-          <div v-if="scope.row.metaInfo">
-            <p><strong>URL:</strong> {{ JSON.parse(scope.row.metaInfo).url }}</p>
-            <p><strong>Method:</strong> {{ JSON.parse(scope.row.metaInfo).method }}</p>
+          <div class="json-container" @click="openJsonDialog(scope.row.metaInfo, '节点元数据信息')">
+            <pre class="json-preview">{{ formatJsonPreview(scope.row.metaInfo) }}</pre>
+            <div class="json-overlay">点击查看详情</div>
           </div>
         </template>
       </el-table-column>
 
-      <el-table-column label="操作" width="400" fixed="right">
+      <el-table-column label="操作" width="400" fixed="right" header-align="center">
         <template #default="scope">
           <!-- 第一行：基础操作按钮 -->
           <div style="display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 8px;">
@@ -173,14 +173,45 @@
         <el-button type="primary" @click="submitForm">确 定</el-button>
       </span>
     </el-dialog>
+
+    <!-- JSON详情弹窗 -->
+    <el-dialog
+      :title="jsonDialogTitle"
+      :visible.sync="jsonDialogVisible"
+      width="80%"
+      top="20px"
+      @close="resetJsonDialog"
+    >
+      <div class="json-detail-container">
+        <json-viewer 
+          :value="parsedJson" 
+          :expand-depth="3" 
+          :copyable="false"
+          :sort="false"
+          class="left-aligned-json"
+        >
+          <template #copy>
+            <el-button size="mini" @click.stop="copyJson">复制内容</el-button>
+          </template>
+        </json-viewer>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="copyJson">复制内容</el-button>
+        <el-button type="primary" @click="jsonDialogVisible = false">关闭</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import request from '@/utils/request';
+import JsonViewer from 'vue-json-viewer';
 
 export default {
   name: 'WorkflowNode',
+  components: {
+    JsonViewer
+  },
   data() {
     return {
       nodes: [],
@@ -223,7 +254,13 @@ export default {
         pageNum: 1,
         pageSize: 10
       },
-      currentNode: null  // 用于存储当前要导入的节点信息
+      currentNode: null,  // 用于存储当前要导入的节点信息
+      
+      // JSON弹窗相关
+      jsonDialogVisible: false,
+      jsonDialogTitle: '',
+      currentJson: '',
+      parsedJson: null,
     };
   },
   mounted() {
@@ -533,6 +570,59 @@ export default {
     handleCurrentChange(val) {
       this.pagination.pageNum = val;
       this.fetchNodes();
+    },
+
+    // 格式化列表中的JSON预览（限制显示行数）
+    formatJsonPreview(str) {
+      try {
+        if (!str) return '无数据';
+        
+        const obj = JSON.parse(str);
+        const formatted = JSON.stringify(obj, null, 2);
+        const lines = formatted.split('\n');
+        
+        // 只显示前3行，超过的用省略号表示
+        if (lines.length > 3) {
+          return [...lines.slice(0, 3), '  ...'].join('\n');
+        }
+        return formatted;
+      } catch (e) {
+        // 不是JSON格式的字符串，直接显示前100个字符
+        return str.length > 100 ? str.substring(0, 100) + '...' : str;
+      }
+    },
+
+    // 打开JSON弹窗
+    openJsonDialog(jsonStr, title) {
+      this.jsonDialogTitle = title;
+      this.currentJson = jsonStr || '';
+      
+      // 解析JSON
+      try {
+        this.parsedJson = jsonStr ? JSON.parse(jsonStr) : null;
+      } catch (e) {
+        this.parsedJson = { error: 'Invalid JSON format', content: jsonStr };
+      }
+      
+      this.jsonDialogVisible = true;
+    },
+
+    // 复制JSON到剪贴板
+    copyJson() {
+      navigator.clipboard.writeText(this.currentJson || '')
+        .then(() => {
+          this.$message.success('已复制到剪贴板');
+        })
+        .catch(err => {
+          this.$message.error('复制失败：' + err.message);
+        });
+    },
+
+    // 重置JSON弹窗
+    resetJsonDialog() {
+      this.parsedJson = null;
+      this.currentJson = '';
+      this.jsonDialogTitle = '';
     }
   }
 };
@@ -562,5 +652,68 @@ export default {
 ::v-deep .el-tag--info {
   background-color: #e8f4fd;
   color: #1890ff;
+}
+
+/* JSON容器样式 */
+.json-container {
+  position: relative;
+  cursor: pointer;
+}
+
+/* 列表中的JSON预览样式 */
+.json-preview {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0;
+  background-color: #f5f5f5;
+  padding: 10px;
+  border-radius: 4px;
+  max-height: 80px;
+  overflow-y: auto;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #333;
+  transition: all 0.2s;
+}
+
+.json-container:hover .json-preview {
+  background-color: #eee;
+}
+
+/* 悬浮提示层 */
+.json-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.json-container:hover .json-overlay {
+  opacity: 1;
+}
+
+/* JSON详情弹窗样式 */
+.json-detail-container {
+  max-height: 60vh;
+  overflow: auto;
+  padding: 10px;
+  background-color: #fff;
+}
+
+/* 左对齐JSON样式 */
+.left-aligned-json {
+  text-align: left !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 </style>
