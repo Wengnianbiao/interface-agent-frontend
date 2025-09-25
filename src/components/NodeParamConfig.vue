@@ -45,11 +45,6 @@
           <el-tag size="small">{{ scope.row.sourceParamType }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="operationType" label="操作类型" width="120">
-        <template #default="scope">
-          <el-tag size="small" type="info">{{ scope.row.operationType || '-' }}</el-tag>
-        </template>
-      </el-table-column>
       <el-table-column prop="targetParamKey" label="目标参数名" width="150"></el-table-column>
       <el-table-column prop="targetParamType" label="目标参数类型" width="120">
         <template #default="scope">
@@ -135,22 +130,6 @@
             <el-option label="对象" value="OBJECT"></el-option>
             <el-option label="数组" value="ARRAY"></el-option>
             <el-option label="无" value="NONE"></el-option>
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="操作类型" prop="operationType">
-          <el-select v-model="editForm.operationType" placeholder="请选择操作类型" clearable>
-            <el-option label="等于" value="EQUAL"></el-option>
-            <el-option label="不等于" value="NOT_EQUAL"></el-option>
-            <el-option label="大于" value="GREATER_THAN"></el-option>
-            <el-option label="小于" value="LESS_THAN"></el-option>
-            <el-option label="大于等于" value="GREATER_EQUAL"></el-option>
-            <el-option label="小于等于" value="LESS_EQUAL"></el-option>
-            <el-option label="模糊匹配" value="LIKE"></el-option>
-            <el-option label="包含" value="IN"></el-option>
-            <el-option label="不包含" value="NOT_IN"></el-option>
-            <el-option label="为空" value="IS_NULL"></el-option>
-            <el-option label="不为空" value="IS_NOT_NULL"></el-option>
           </el-select>
         </el-form-item>
 
@@ -254,9 +233,7 @@ export default {
         processType: '',
         mappingType: '',
         mappingRule: '',
-        paramDesc: '',
-        // 新增operationType字段
-        operationType: null
+        paramDesc: ''
       },
       editRules: {
         nodeId: [
@@ -270,10 +247,6 @@ export default {
         ],
         sourceParamType: [
           { required: true, message: '请选择源参数类型', trigger: 'change' }
-        ],
-        // 新增operationType验证规则
-        operationType: [
-          { required: false, message: '请选择操作类型', trigger: 'change' }
         ],
         targetParamKey: [
           { required: true, message: '请输入目标参数名', trigger: 'blur' }
@@ -544,9 +517,7 @@ export default {
         processType: '',
         mappingType: '',
         mappingRule: '',
-        paramDesc: '',
-        // 重置operationType
-        operationType: null
+        paramDesc: ''
       };
       this.configParentOptions = [];
     },
@@ -563,11 +534,6 @@ export default {
             
             if (submitData.parentId === '') {
               submitData.parentId = null;
-            }
-            
-            // 处理operationType为空的情况
-            if (submitData.operationType === '') {
-              submitData.operationType = null;
             }
             
             let response;
