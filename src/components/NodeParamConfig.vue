@@ -38,6 +38,13 @@
           {{ nodeMap.get(scope.row.nodeId) || scope.row.nodeId }}
         </template>
       </el-table-column>
+      <el-table-column prop="processType" label="处理类型" width="120">
+        <template #default="scope">
+          <el-tag :type="scope.row.processType === 'PRE_PROCESS' ? 'primary' : 'success'">
+            {{ scope.row.processType === 'PRE_PROCESS' ? '前置处理' : '后置处理' }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column prop="paramDesc" label="参数描述" show-overflow-tooltip width="200"></el-table-column>
       <el-table-column prop="sourceParamKey" label="源参数名" width="150"></el-table-column>
       <el-table-column prop="sourceParamType" label="源参数类型" width="120">
@@ -49,13 +56,6 @@
       <el-table-column prop="targetParamType" label="目标参数类型" width="120">
         <template #default="scope">
           <el-tag size="small">{{ scope.row.targetParamType }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column prop="processType" label="处理类型" width="120">
-        <template #default="scope">
-          <el-tag :type="scope.row.processType === 'PRE_PROCESS' ? 'primary' : 'success'">
-            {{ scope.row.processType === 'PRE_PROCESS' ? '前置处理' : '后置处理' }}
-          </el-tag>
         </template>
       </el-table-column>
       <el-table-column prop="mappingType" label="映射类型" width="120"></el-table-column>
@@ -111,6 +111,12 @@
             <el-option v-for="node in nodeOptions" :key="node.nodeId" :label="node.nodeName" :value="node.nodeId"></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="处理类型" prop="processType">
+          <el-select v-model="editForm.processType" placeholder="请选择处理类型">
+            <el-option label="前置处理" value="PRE_PROCESS"></el-option>
+            <el-option label="后置处理" value="POST_PROCESS"></el-option>
+          </el-select>
+        </el-form-item>
 
         <!-- 源参数名：当源参数类型为NONE时隐藏 -->
         <el-form-item 
@@ -120,7 +126,6 @@
         >
           <el-input v-model="editForm.sourceParamKey" placeholder="请输入源参数名"></el-input>
         </el-form-item>
-
         <el-form-item label="源参数类型" prop="sourceParamType">
           <el-select v-model="editForm.sourceParamType" placeholder="请选择源参数类型">
             <el-option label="字符串" value="STRING"></el-option>
@@ -129,6 +134,7 @@
             <el-option label="布尔" value="BOOLEAN"></el-option>
             <el-option label="对象" value="OBJECT"></el-option>
             <el-option label="数组" value="ARRAY"></el-option>
+            <el-option label="纯数组" value="PURE_ARRAY"></el-option>
             <el-option label="无" value="NONE"></el-option>
           </el-select>
         </el-form-item>
@@ -156,14 +162,8 @@
             <el-option label="布尔" value="BOOLEAN"></el-option>
             <el-option label="对象" value="OBJECT"></el-option>
             <el-option label="数组" value="ARRAY"></el-option>
+            <el-option label="纯数组" value="PURE_ARRAY"></el-option>
             <el-option label="无" value="NONE"></el-option>
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="处理类型" prop="processType">
-          <el-select v-model="editForm.processType" placeholder="请选择处理类型">
-            <el-option label="前置处理" value="PRE_PROCESS"></el-option>
-            <el-option label="后置处理" value="POST_PROCESS"></el-option>
           </el-select>
         </el-form-item>
 
