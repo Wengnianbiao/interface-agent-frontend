@@ -95,7 +95,7 @@
       暂无调用日志数据
     </div>
 
-    <!-- JSON详情弹窗 -->
+    <!-- JSON/XML详情弹窗 -->
     <el-dialog
       :title="dialogTitle"
       :visible.sync="jsonDialogVisible"
@@ -104,18 +104,25 @@
       @close="resetJsonDialog"
     >
       <div class="json-detail-container">
-        <!-- 使用vue-json-viewer展示格式化、高亮和可折叠的JSON -->
-        <json-viewer 
-          :value="parsedJson" 
-          :expand-depth="3" 
-          :copyable="false"
-          :sort="false"
-          class="left-aligned-json"
-        >
-          <template #copy>
-            <el-button size="mini" @click.stop="copyJson">复制内容</el-button>
-          </template>
-        </json-viewer>
+        <!-- 根据内容类型决定展示方式 -->
+        <div v-if="isXmlContent">
+          <div class="xml-container">
+            <pre class="xml-preview">{{ currentJson }}</pre>
+          </div>
+        </div>
+        <div v-else>
+          <json-viewer 
+            :value="parsedJson" 
+            :expand-depth="3" 
+            :copyable="false"
+            :sort="false"
+            class="left-aligned-json"
+          >
+            <template #copy>
+              <el-button size="mini" @click.stop="copyJson">复制内容</el-button>
+            </template>
+          </json-viewer>
+        </div>
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="copyJson">复制内容</el-button>
@@ -132,7 +139,7 @@ import JsonViewer from 'vue-json-viewer'; // 导入JSON查看器组件
 export default {
   name: 'InvokeLog',
   components: {
-    JsonViewer // 注册组件
+    JsonViewer
   },
   data() {
     return {
@@ -146,21 +153,19 @@ export default {
         pageNum: 1,
         pageSize: 10
       },
-      // JSON弹窗相关
       jsonDialogVisible: false,
       dialogTitle: '',
       currentJson: '',
-      parsedJson: null, // 解析后的JSON对象
-      // 节点数据
+      parsedJson: null,
       nodeOptions: [],
-      nodeMap: new Map()
+      nodeMap: new Map(),
+      isXmlContent: false // 控制是否为 XML 内容
     };
   },
   mounted() {
     this.fetchNodeList();
   },
   methods: {
-    // 获取节点列表
     async fetchNodeList() {
       try {
         const response = await fetchNodeList();
@@ -179,7 +184,6 @@ export default {
       }
     },
 
-    // 获取日志列表
     async fetchLogList() {
       this.loading = true;
       try {
@@ -203,53 +207,48 @@ export default {
       }
     },
 
-    // 搜索
     handleSearch() {
       this.pagination.pageNum = 1;
       this.fetchLogList();
     },
 
-    // 重置
     handleReset() {
       this.searchForm.nodeId = '';
       this.pagination.pageNum = 1;
       this.fetchLogList();
     },
 
-    // 分页大小改变
     handleSizeChange(val) {
       this.pagination.pageSize = val;
       this.pagination.pageNum = 1;
       this.fetchLogList();
     },
 
-    // 页码改变
     handleCurrentChange(val) {
       this.pagination.pageNum = val;
       this.fetchLogList();
     },
 
-    // 格式化列表中的JSON预览（限制显示行数）
     formatJsonPreview(str) {
+      if (!str) return '无数据';
+
+      // 判断是否为 XML
+      const isXml = str.trim().startsWith('<') && str.trim().endsWith('>');
+
+      if (isXml) {
+        return str.length > 100 ? str.substring(0, 100) + '...' : str;
+      }
+
       try {
-        if (!str) return '无数据';
-        
         const obj = JSON.parse(str);
         const formatted = JSON.stringify(obj, null, 2);
         const lines = formatted.split('\n');
-        
-        // 只显示前5行，超过的用省略号表示
-        if (lines.length > 5) {
-          return [...lines.slice(0, 5), '  ...'].join('\n');
-        }
-        return formatted;
+        return lines.length > 5 ? [...lines.slice(0, 5), '  ...'].join('\n') : formatted;
       } catch (e) {
-        // 不是JSON格式的字符串，直接显示前100个字符
         return str.length > 100 ? str.substring(0, 100) + '...' : str;
       }
     },
 
-    // 格式化时间戳，精确到毫秒
     formatDateTime(timestamp) {
       if (!timestamp) return '';
       const date = new Date(timestamp);
@@ -264,22 +263,33 @@ export default {
       return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
     },
 
-    // 打开JSON弹窗
     openJsonDialog(jsonStr, title) {
       this.dialogTitle = title;
       this.currentJson = jsonStr || '';
-      
-      // 解析JSON
-      try {
-        this.parsedJson = jsonStr ? JSON.parse(jsonStr) : null;
-      } catch (e) {
-        this.parsedJson = { error: 'Invalid JSON format', content: jsonStr };
+      this.isXmlContent = false;
+
+      if (!jsonStr) {
+        this.parsedJson = null;
+        this.jsonDialogVisible = true;
+        return;
       }
-      
+
+      // 判断是否为 XML
+      const isXml = jsonStr.trim().startsWith('<') && jsonStr.trim().endsWith('>');
+      if (isXml) {
+        this.isXmlContent = true;
+        this.parsedJson = null;
+      } else {
+        try {
+          this.parsedJson = JSON.parse(jsonStr);
+        } catch (e) {
+          this.parsedJson = { error: 'Invalid JSON format', content: jsonStr };
+        }
+      }
+
       this.jsonDialogVisible = true;
     },
 
-    // ✅ 修复：增强兼容性的复制方法（参考 WorkflowNode）
     copyJson() {
       const text = this.currentJson || '';
       if (!text) {
@@ -287,7 +297,6 @@ export default {
         return;
       }
 
-      // 尝试使用 navigator.clipboard（现代浏览器）
       if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
         navigator.clipboard.writeText(text)
           .then(() => {
@@ -295,16 +304,13 @@ export default {
           })
           .catch(err => {
             console.warn('Clipboard API failed:', err);
-            // Fallback to execCommand
             this.fallbackCopy(text);
           });
       } else {
-        // Fallback to execCommand（兼容旧浏览器）
         this.fallbackCopy(text);
       }
     },
 
-    // ✅ Fallback 方法：创建 textarea 并执行 copy
     fallbackCopy(text) {
       const textarea = document.createElement('textarea');
       textarea.value = text;
@@ -330,11 +336,11 @@ export default {
       document.body.removeChild(textarea);
     },
 
-    // 重置JSON弹窗
     resetJsonDialog() {
       this.parsedJson = null;
       this.currentJson = '';
       this.dialogTitle = '';
+      this.isXmlContent = false;
     }
   }
 };
@@ -415,12 +421,35 @@ export default {
   opacity: 1;
 }
 
+/* XML 预览样式 */
+.xml-container {
+  background-color: #f5f5f5;
+  padding: 10px;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-family: monospace;
+  color: #333;
+}
+
+.xml-preview {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0;
+  background-color: #f5f5f5;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: left !important;
+  color: #333;
+}
+
 /* JSON详情弹窗样式 */
 .json-detail-container {
   max-height: 60vh;
   overflow: auto;
   padding: 10px;
-  background-color: #fff; /* 确保背景为白色 */
+  background-color: #fff;
 }
 
 .left-aligned-json {
@@ -429,4 +458,3 @@ export default {
   margin: 0 !important;
 }
 </style>
-
