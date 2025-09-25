@@ -172,6 +172,7 @@
             <el-option label="固定值" value="CONSTANT"></el-option>
             <el-option label="名称映射" value="NAME"></el-option>
             <el-option label="表达式" value="EXPRESSION"></el-option>
+            <el-option label="直接映射" value="DIRECT"></el-option>
           </el-select>
         </el-form-item>
 
