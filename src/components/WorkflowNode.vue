@@ -108,7 +108,7 @@
         </el-form-item>
 
         <el-form-item label="所属工作流" prop="flowId">
-          <el-select v-model.number="form.flowId" placeholder="请选择所属工作流" style="width: 100%">
+          <el-select v-model.number="form.flowId" placeholder="请选择所属工作流" clearable style="width: 100%">
             <el-option
               v-for="flow in workflowOptions"
               :key="flow.flowId"
@@ -204,8 +204,8 @@ export default {
       filterFlowId: null,
       form: {
         nodeId: '',
-        节点名称: '',
-        flowId: '',
+        nodeName: '',
+        flowId: null,
         nodeType: 'HTTP',
         metaInfo: '{}',
         scheduleParamSourceType: '',
@@ -213,11 +213,8 @@ export default {
         paramFilterExpr: ''
       },
       rules: {
-        节点名称: [
+        nodeName: [
           { required: true, message: '请输入节点名称', trigger: 'blur' }
-        ],
-        flowId: [
-          { required: true, message: '请选择所属工作流', trigger: 'change' }
         ],
         nodeType: [
           { required: true, message: '请选择节点类型', trigger: 'change' }
@@ -311,7 +308,7 @@ export default {
     },
 
     getFlowName(flowId) {
-      return this.flowIdToNameMap.get(flowId) || '未知';
+      return this.flowIdToNameMap.get(flowId) || '未分配';
     },
 
     handleFilterChange() {
@@ -341,17 +338,13 @@ export default {
       const copied = JSON.parse(JSON.stringify(row));
       copied.nodeId = '';
       copied.nodeName = `${copied.nodeName}（副本）`;
-      copied.flowId = '';
+      copied.flowId = null;
       copied.scheduleExpr = '';
       copied.paramFilterExpr = '';
 
       this.form = copied;
       this.dialogTitle = '复制节点';
       this.dialogVisible = true;
-
-      this.$nextTick(() => {
-        this.$message.warning('复制节点需重新选择所属工作流');
-      });
     },
 
     handleDelete(row) {
@@ -465,8 +458,8 @@ export default {
       this.$refs.form?.resetFields();
       this.form = {
         nodeId: '',
-        节点名称: '',
-        flowId: '',
+        nodeName: '',
+        flowId: null,
         nodeType: 'HTTP',
         metaInfo: '{}',
         scheduleParamSourceType: '',
