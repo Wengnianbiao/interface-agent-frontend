@@ -90,11 +90,6 @@
     >
     </el-pagination>
 
-    <!-- 数据为空时的提示 -->
-    <div v-if="!loading && logList.length === 0" style="text-align: center; padding: 20px; color: #999;">
-      暂无调用日志数据
-    </div>
-
     <!-- JSON/XML详情弹窗 -->
     <el-dialog
       :title="dialogTitle"

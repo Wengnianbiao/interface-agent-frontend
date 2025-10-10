@@ -72,11 +72,6 @@
       </el-table-column>
     </el-table>
 
-    <!-- 数据为空时的提示 -->
-    <div v-if="!loading && nodes.length === 0" style="text-align: center; padding: 20px; color: #999;">
-      暂无节点数据
-    </div>
-
     <!-- 分页组件 -->
     <el-pagination
       @size-change="handleSizeChange"

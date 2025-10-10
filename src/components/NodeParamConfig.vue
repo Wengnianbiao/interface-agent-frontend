@@ -21,7 +21,6 @@
       <el-form-item>
         <el-button type="primary" @click="handleSearch">查询</el-button>
         <el-button @click="handleReset">重置</el-button>
-        <el-button type="success" @click="handleExport">导出</el-button>
       </el-form-item>
     </el-form>
 
@@ -86,11 +85,6 @@
       style="margin-top: 20px; text-align: right;"
     >
     </el-pagination>
-
-    <!-- 数据为空时的提示 -->
-    <div v-if="!loading && configList.length === 0" style="text-align: center; padding: 20px; color: #999;">
-      暂无参数配置数据
-    </div>
 
     <!-- 编辑/新增对话框 -->
     <el-dialog
@@ -172,7 +166,9 @@
             <el-option label="固定值" value="CONSTANT"></el-option>
             <el-option label="名称映射" value="NAME"></el-option>
             <el-option label="表达式" value="EXPRESSION"></el-option>
+            <el-option label="Bean表达式" value="BEAN_EXPRESSION"></el-option>
             <el-option label="直接映射" value="DIRECT"></el-option>
+            <el-option label="单值映射" value="SINGLE_MAP"></el-option>
           </el-select>
         </el-form-item>
 
@@ -244,7 +240,7 @@ export default {
           { required: false, message: '请选择父参数', trigger: 'change' }
         ],
         sourceParamKey: [
-          { required: true, message: '请输入源参数名', trigger: 'blur' }
+          { required: false, message: '请输入源参数名', trigger: 'blur' }
         ],
         sourceParamType: [
           { required: true, message: '请选择源参数类型', trigger: 'change' }
@@ -284,8 +280,6 @@ export default {
       if (newVal === 'NONE') {
         sourceParamKeyRule.required = false;
         this.editForm.sourceParamKey = '';
-      } else {
-        sourceParamKeyRule.required = true;
       }
     },
     'editForm.nodeId': function(newVal) {
@@ -557,19 +551,6 @@ export default {
           }
         }
       });
-    },
-
-    handleExport() {
-      const dataStr = JSON.stringify(this.configList, null, 2);
-      const blob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'node-param-config-export.json';
-      link.click();
-      
-      URL.revokeObjectURL(url);
     }
   }
 };
