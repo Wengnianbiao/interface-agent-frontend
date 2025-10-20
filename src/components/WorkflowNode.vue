@@ -45,6 +45,7 @@
           <el-tag size="small">{{ scope.row.nodeType }}</el-tag>
         </template>
       </el-table-column>
+      <el-table-column prop="keywordField" label="关键字字段" width="120"></el-table-column>
       <el-table-column label="节点元数据信息" show-overflow-tooltip header-align="center">
         <template #default="scope">
           <div class="json-container" @click="openJsonDialog(scope.row.metaInfo, '节点元数据信息')">
@@ -136,6 +137,10 @@
           <el-input v-model="form.paramFilterExpr" placeholder="请输入参数过滤表达式"></el-input>
         </el-form-item>
 
+        <el-form-item label="关键字字段" prop="keywordField">
+          <el-input v-model="form.keywordField" placeholder="请输入关键字字段名"></el-input>
+        </el-form-item>
+
         <el-form-item label="节点元数据信息" prop="metaInfo">
           <el-input
             v-model="form.metaInfo"
@@ -205,7 +210,8 @@ export default {
         metaInfo: '{}',
         scheduleParamSourceType: '',
         scheduleExpr: '',
-        paramFilterExpr: ''
+        paramFilterExpr: '',
+        keywordField: ''
       },
       rules: {
         nodeName: [
@@ -336,6 +342,7 @@ export default {
       copied.flowId = null;
       copied.scheduleExpr = '';
       copied.paramFilterExpr = '';
+      copied.keywordField = '';
 
       this.form = copied;
       this.dialogTitle = '复制节点';
@@ -459,7 +466,8 @@ export default {
         metaInfo: '{}',
         scheduleParamSourceType: '',
         scheduleExpr: '',
-        paramFilterExpr: ''
+        paramFilterExpr: '',
+        keywordField: ''
       };
     },
 

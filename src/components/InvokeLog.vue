@@ -10,6 +10,10 @@
         </el-select>
       </el-form-item>
 
+      <el-form-item label="关键字">
+        <el-input v-model="searchForm.keyword" placeholder="请输入关键字" clearable></el-input>
+      </el-form-item>
+
       <el-form-item>
         <el-button type="primary" @click="handleSearch">查询</el-button>
         <el-button @click="handleReset">重置</el-button>
@@ -21,6 +25,12 @@
       <el-table-column label="接口名称" min-width="150">
         <template #default="scope">
           {{ nodeMap.get(scope.row.nodeId) || scope.row.nodeId }}
+        </template>
+      </el-table-column>
+
+      <el-table-column label="关键字" min-width="150">
+        <template #default="scope">
+          {{ scope.row.keyword || '-' }}
         </template>
       </el-table-column>
       
@@ -139,7 +149,8 @@ export default {
   data() {
     return {
       searchForm: {
-        nodeId: ''
+        nodeId: '',
+        keyword: ''
       },
       logList: [],
       loading: false,
@@ -184,6 +195,7 @@ export default {
       try {
         const params = {
           nodeId: this.searchForm.nodeId || undefined,
+          keyword: this.searchForm.keyword || undefined,
           pageNum: this.pagination.pageNum,
           pageSize: this.pagination.pageSize
         };
@@ -209,6 +221,7 @@ export default {
 
     handleReset() {
       this.searchForm.nodeId = '';
+      this.searchForm.keyword = '';
       this.pagination.pageNum = 1;
       this.fetchLogList();
     },
