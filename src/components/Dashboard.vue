@@ -1,28 +1,29 @@
+<!-- src/components/Dashboard.vue -->
 <template>
   <div class="dashboard">
-    <p>欢迎使用接口可配置后台</p>
+    <h1>系统仪表板</h1>
+    <LatestInvokeTime />
   </div>
 </template>
 
 <script>
+import LatestInvokeTime from './InvokeTimeBoard.vue';
+
 export default {
-  name: 'SystemDashboard'
+  name: 'SystemDashboard',
+  components: {
+    LatestInvokeTime
+  }
 };
 </script>
 
 <style scoped>
 .dashboard {
-  padding: 50px;
-  text-align: center;
+  padding: 20px;
 }
 
 .dashboard h1 {
   color: #333;
   margin-bottom: 20px;
-}
-
-.dashboard p {
-  color: #666;
-  font-size: 100px;
 }
 </style>
