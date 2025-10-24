@@ -21,17 +21,12 @@
       <el-form-item>
         <el-button type="primary" @click="handleSearch">查询</el-button>
         <el-button @click="handleReset">重置</el-button>
+        <el-button type="success" @click="handleAdd">新增</el-button>
       </el-form-item>
     </el-form>
 
-    <!-- 操作按钮区 -->
-    <div style="margin-bottom: 10px; text-align: right;">
-      <el-button type="success" @click="handleAdd">新增</el-button>
-    </div>
-
     <!-- 参数配置表格 -->
     <el-table :data="configList" style="width: 100%" v-loading="loading">
-      <!-- 移除配置ID列 -->
       <el-table-column label="节点名称" width="150">
         <template #default="scope">
           {{ nodeMap.get(scope.row.nodeId) || scope.row.nodeId }}
@@ -99,7 +94,6 @@
         ref="editForm"
         label-width="120px"
       >
-        <!-- 移除配置ID显示 -->
         <el-form-item label="节点" prop="nodeId">
           <el-select v-model="editForm.nodeId" placeholder="请选择节点">
             <el-option v-for="node in nodeOptions" :key="node.nodeId" :label="node.nodeName" :value="node.nodeId"></el-option>
@@ -112,11 +106,23 @@
           </el-select>
         </el-form-item>
 
+        <el-form-item label="父参数" prop="parentId">
+          <el-select v-model="editForm.parentId" placeholder="请选择父参数" clearable>
+            <el-option 
+              v-for="config in configParentOptions" 
+              :key="config.configId" 
+              :label="`${config.targetParamKey} (${config.paramDesc || '无描述'})`" 
+              :value="config.configId"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+
         <!-- 源参数名：当源参数类型为NONE时隐藏 -->
         <el-form-item 
           label="源参数名" 
           prop="sourceParamKey"
           v-if="editForm.sourceParamType !== 'NONE'"
+          
         >
           <el-input v-model="editForm.sourceParamKey" placeholder="请输入源参数名"></el-input>
         </el-form-item>
@@ -137,17 +143,6 @@
           <el-input v-model="editForm.targetParamKey" placeholder="请输入目标参数名"></el-input>
         </el-form-item>
 
-        <el-form-item label="父参数" prop="parentId">
-          <el-select v-model="editForm.parentId" placeholder="请选择父参数" clearable>
-            <el-option 
-              v-for="config in configParentOptions" 
-              :key="config.configId" 
-              :label="`${config.targetParamKey} (${config.paramDesc || '无描述'})`" 
-              :value="config.configId"
-            ></el-option>
-          </el-select>
-        </el-form-item>
-
         <el-form-item label="目标参数类型" prop="targetParamType">
           <el-select v-model="editForm.targetParamType" placeholder="请选择目标参数类型">
             <el-option label="字符串" value="STRING"></el-option>
@@ -166,7 +161,7 @@
             <el-option label="固定值" value="CONSTANT"></el-option>
             <el-option label="名称映射" value="NAME"></el-option>
             <el-option label="表达式" value="EXPRESSION"></el-option>
-            <el-option label="Bean表达式" value="BEAN_EXPRESSION"></el-option>
+            <el-option label="函数表达式" value="BEAN_EXPRESSION"></el-option>
             <el-option label="直接映射" value="DIRECT"></el-option>
             <el-option label="单值映射" value="SINGLE_MAP"></el-option>
           </el-select>
@@ -186,7 +181,7 @@
             v-model="editForm.paramDesc"
             type="textarea"
             :rows="2"
-            placeholder="请输入参数描述，例如：响应状态码转换：1->1，其他->-1"
+            placeholder="请输入参数描述，用于说明目标参数的业务用途"
           ></el-input>
         </el-form-item>
       </el-form>

@@ -55,7 +55,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="操作" width="400" fixed="right" header-align="center">
+      <el-table-column label="操作" width="450" fixed="right" header-align="center">
         <template #default="scope">
           <!-- 第一行：基础操作按钮 -->
           <div style="display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 8px;">
@@ -64,10 +64,11 @@
             <el-button size="small" type="danger" @click="handleDelete(scope.row)">删除</el-button>
           </div>
 
-          <!-- 第二行：导出导入按钮 -->
+          <!-- 第二行：导出导入 + 全量删除配置按钮 -->
           <div style="display: flex; justify-content: flex-end; gap: 8px;">
             <el-button size="small" type="warning" @click="exportNodeParams(scope.row)">导出参数配置</el-button>
             <el-button size="small" type="primary" @click="handleImportClick(scope.row)">导入参数配置</el-button>
+            <el-button size="small" type="danger" @click="handleDeleteAllConfig(scope.row)">全量删除配置</el-button>
           </div>
         </template>
       </el-table-column>
@@ -365,6 +366,23 @@ export default {
       }).catch(() => {});
     },
 
+    // 新增：全量删除配置方法
+    handleDeleteAllConfig(row) {
+      this.$confirm(`确定要全量删除节点 "${row.nodeName}" 的所有配置吗? 此操作不可恢复!`, '警告', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'danger'
+      }).then(async () => {
+        try {
+          await request.delete(`/v1/console/node/${row.nodeId}/delete-all-config`);
+          this.$message.success('全量删除配置成功');
+          this.fetchNodes(); // 刷新列表
+        } catch (error) {
+          this.$message.error('全量删除配置失败: ' + error.message);
+        }
+      }).catch(() => {});
+    },
+
     async exportNodeParams(row) {
       if (!row.nodeId) {
         this.$message.error('节点ID不存在，无法导出参数配置');
@@ -408,7 +426,7 @@ export default {
       }
     },
 
-    // ✅ 修复：动态创建 input 元素，避免分页失效
+    // 处理文件上传（适配动态 input）
     handleImportClick(row) {
       this.currentNode = row;
       const fileInput = document.createElement('input');
@@ -422,7 +440,6 @@ export default {
       fileInput.click();
     },
 
-    // ✅ 处理文件上传（适配动态 input）
     async handleFileUpload(event) {
       const file = event.target.files[0];
       if (!file) return;

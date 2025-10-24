@@ -102,8 +102,10 @@ export default {
       this.activeIndex = '2-2';
     } else if (currentPath === '/workflow/node/param/config') {
       this.activeIndex = '2-3';
-    } else if (currentPath === '/invoke/log') { // 新增判断
+    } else if (currentPath === '/invoke/log') {
       this.activeIndex = '2-4';
+    } else if (currentPath === '/settings') {
+      this.activeIndex = '3';
     }
   },
   watch: {
@@ -116,8 +118,10 @@ export default {
         this.activeIndex = '2-2';
       } else if (to.path === '/workflow/node/param/config') {
         this.activeIndex = '2-3';
-      } else if (to.path === '/invoke/log') { // 新增监听
+      } else if (to.path === '/invoke/log') {
         this.activeIndex = '2-4';
+      } else if (to.path === '/settings') {
+        this.activeIndex = '3';
       }
     }
   }
@@ -126,15 +130,14 @@ export default {
 
 <style scoped>
 .navbar {
-  height: 100vh; /* 设置为视口高度 */
+  height: 100vh;
   width: 200px;
-  position: fixed; /* 固定定位 */
+  position: fixed;
   top: 0;
   left: 0;
-  z-index: 1000; /* 确保在其他元素之上 */
+  z-index: 1000;
 }
 
-/* 调整菜单项的样式 */
 .el-menu {
   border-right: none;
   height: 100%;
@@ -150,13 +153,11 @@ export default {
   background-color: #409eff !important;
 }
 
-/* 调整图标和文字的间距 */
 .el-menu-item i,
 .el-submenu i {
   margin-right: 10px;
 }
 
-/* 调整子菜单的样式 */
 .el-submenu .el-menu {
   background-color: #545c64;
 }
