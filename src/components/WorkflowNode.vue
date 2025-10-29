@@ -120,22 +120,8 @@
             <el-option label="HTTP" value="HTTP"></el-option>
             <el-option label="WEBSERVICE" value="WEBSERVICE"></el-option>
             <el-option label="数据库" value="DATABASE"></el-option>
+            <el-option label="WEBSERVICE-JSON" value="WEBSERVICE-JSON"></el-option>
           </el-select>
-        </el-form-item>
-
-        <el-form-item label="调度参数类型" prop="scheduleParamSourceType">
-          <el-select v-model="form.scheduleParamSourceType" placeholder="请选择调度参数类型" clearable>
-            <el-option label="原始入参" value="ORIGINAL"></el-option>
-            <el-option label="上个节点响应" value="PRE_RESPONSE"></el-option>
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="调度表达式" prop="scheduleExpr">
-          <el-input v-model="form.scheduleExpr" placeholder="请输入调度表达式"></el-input>
-        </el-form-item>
-
-        <el-form-item label="参数过滤表达式" prop="paramFilterExpr">
-          <el-input v-model="form.paramFilterExpr" placeholder="请输入参数过滤表达式"></el-input>
         </el-form-item>
 
         <el-form-item label="关键字字段" prop="keywordField">
@@ -149,6 +135,21 @@
             :rows="4"
             placeholder="请输入JSON格式的元数据，例如：{&quot;url&quot;:&quot;http://xxx&quot;,&quot;method&quot;:&quot;POST&quot;}"
           ></el-input>
+        </el-form-item>
+
+        <el-form-item label="参数过滤表达式" prop="paramFilterExpr">
+          <el-input v-model="form.paramFilterExpr" placeholder="请输入参数过滤表达式"></el-input>
+        </el-form-item>
+
+        <el-form-item label="调度表达式" prop="scheduleExpr">
+          <el-input v-model="form.scheduleExpr" placeholder="请输入调度表达式"></el-input>
+        </el-form-item>
+
+        <el-form-item label="调度参数类型" prop="scheduleParamSourceType">
+          <el-select v-model="form.scheduleParamSourceType" placeholder="请选择调度参数类型" clearable>
+            <el-option label="原始入参" value="ORIGINAL"></el-option>
+            <el-option label="当前节点响应" value="PRE_RESPONSE"></el-option>
+          </el-select>
         </el-form-item>
       </el-form>
 

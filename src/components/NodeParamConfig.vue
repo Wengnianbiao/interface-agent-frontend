@@ -106,17 +106,6 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="父参数" prop="parentId">
-          <el-select v-model="editForm.parentId" placeholder="请选择父参数" clearable>
-            <el-option 
-              v-for="config in configParentOptions" 
-              :key="config.configId" 
-              :label="`${config.targetParamKey} (${config.paramDesc || '无描述'})`" 
-              :value="config.configId"
-            ></el-option>
-          </el-select>
-        </el-form-item>
-
         <!-- 源参数名：当源参数类型为NONE时隐藏 -->
         <el-form-item 
           label="源参数名" 
@@ -156,10 +145,22 @@
           </el-select>
         </el-form-item>
 
+
+        <el-form-item label="父参数" prop="parentId">
+          <el-select v-model="editForm.parentId" placeholder="请选择父参数" clearable>
+            <el-option 
+              v-for="config in configParentOptions" 
+              :key="config.configId" 
+              :label="`${config.targetParamKey} (${config.paramDesc || '无描述'})`" 
+              :value="config.configId"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+
         <el-form-item label="映射类型" prop="mappingType">
           <el-select v-model="editForm.mappingType" placeholder="请选择映射类型">
             <el-option label="固定值" value="CONSTANT"></el-option>
-            <el-option label="名称映射" value="NAME"></el-option>
+            <el-option label="值映射" value="NAME"></el-option>
             <el-option label="表达式" value="EXPRESSION"></el-option>
             <el-option label="函数表达式" value="BEAN_EXPRESSION"></el-option>
             <el-option label="直接映射" value="DIRECT"></el-option>
