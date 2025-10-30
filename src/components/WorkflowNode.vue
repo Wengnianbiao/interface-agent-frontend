@@ -151,6 +151,10 @@
             <el-option label="当前节点响应" value="PRE_RESPONSE"></el-option>
           </el-select>
         </el-form-item>
+        
+        <el-form-item label="SPI拓展字段" prop="remoteExtension">
+          <el-input v-model="form.remoteExtension" placeholder="请输入SPI拓展字段内容"></el-input>
+        </el-form-item>
       </el-form>
 
       <span slot="footer" class="dialog-footer">
@@ -213,7 +217,8 @@ export default {
         scheduleParamSourceType: '',
         scheduleExpr: '',
         paramFilterExpr: '',
-        keywordField: ''
+        keywordField: '',
+        remoteExtension: '' // 添加新字段
       },
       rules: {
         nodeName: [
@@ -345,6 +350,7 @@ export default {
       copied.scheduleExpr = '';
       copied.paramFilterExpr = '';
       copied.keywordField = '';
+      copied.remoteExtension = ''; // 复制时清空SPI拓展字段
 
       this.form = copied;
       this.dialogTitle = '复制节点';
@@ -485,7 +491,8 @@ export default {
         scheduleParamSourceType: '',
         scheduleExpr: '',
         paramFilterExpr: '',
-        keywordField: ''
+        keywordField: '',
+        remoteExtension: '' // 重置时也清空新字段
       };
     },
 
