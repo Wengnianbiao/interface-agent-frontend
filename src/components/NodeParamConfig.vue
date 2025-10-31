@@ -17,6 +17,11 @@
           <el-option label="后置处理" value="POST_PROCESS"></el-option>
         </el-select>
       </el-form-item>
+      
+      <!-- 新增的targetParam搜索框 -->
+      <el-form-item label="目标参数名">
+        <el-input v-model="searchForm.targetParam" placeholder="请输入目标参数名" clearable></el-input>
+      </el-form-item>
 
       <el-form-item>
         <el-button type="primary" @click="handleSearch">查询</el-button>
@@ -204,7 +209,8 @@ export default {
     return {
       searchForm: {
         nodeId: '',
-        processType: ''
+        processType: '',
+        targetParam: ''  // 新增的搜索字段
       },
       configList: [],
       loading: false,
@@ -373,6 +379,7 @@ export default {
         const params = {
           nodeId: this.searchForm.nodeId || undefined,
           processType: this.searchForm.processType || undefined,
+          targetParam: this.searchForm.targetParam || undefined,  // 添加新参数
           pageNum: this.pagination.pageNum,
           pageSize: this.pagination.pageSize
         };
@@ -441,6 +448,7 @@ export default {
     handleReset() {
       this.searchForm.nodeId = '';
       this.searchForm.processType = '';
+      this.searchForm.targetParam = '';  // 重置新字段
       this.pagination.pageNum = 1;
       this.fetchConfigList();
     },
