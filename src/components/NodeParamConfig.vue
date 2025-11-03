@@ -150,6 +150,25 @@
           </el-select>
         </el-form-item>
 
+        <!-- 仅当目标参数类型为对象时显示 -->
+        <el-form-item 
+          label="保留单元素Key" 
+          prop="keepSingleElementKey"
+          v-if="editForm.targetParamType === 'OBJECT'"
+        >
+          <el-switch
+            v-model="editForm.keepSingleElementKey"
+            active-text=""
+            inactive-text="">
+          </el-switch>
+          <el-tooltip
+            content="当对象中只有一个元素时是否保留key"
+            placement="top"
+            effect="light"
+          >
+            <i class="el-icon-question" style="color: orange; margin-left: 14px; cursor: pointer;"></i>
+          </el-tooltip>
+        </el-form-item>
 
         <el-form-item label="父参数" prop="parentId">
           <el-select v-model="editForm.parentId" placeholder="请选择父参数" clearable>
@@ -229,6 +248,7 @@ export default {
         sourceParamType: '',
         targetParamKey: '',
         targetParamType: '',
+        keepSingleElementKey: false,
         processType: '',
         mappingType: '',
         mappingRule: '',
@@ -292,6 +312,12 @@ export default {
     'editForm.processType': function(newVal) {
       if (newVal) {
         this.fetchConfigParentList();
+      }
+    },
+    'editForm.targetParamType': function(newVal) {
+      // 当目标参数类型不是OBJECT时，重置keepSingleElementKey为false
+      if (newVal !== 'OBJECT') {
+        this.editForm.keepSingleElementKey = false;
       }
     }
   },
@@ -513,6 +539,7 @@ export default {
         sourceParamType: '',
         targetParamKey: '',
         targetParamType: '',
+        keepSingleElementKey: false,
         processType: '',
         mappingType: '',
         mappingRule: '',
@@ -533,6 +560,11 @@ export default {
             
             if (submitData.parentId === '') {
               submitData.parentId = null;
+            }
+            
+            // 当目标参数类型不是OBJECT时，不传递keepSingleElementKey字段
+            if (submitData.targetParamType !== 'OBJECT') {
+              delete submitData.keepSingleElementKey;
             }
             
             let response;
