@@ -187,7 +187,6 @@
             <el-option label="值映射" value="NAME"></el-option>
             <el-option label="表达式" value="EXPRESSION"></el-option>
             <el-option label="函数表达式" value="BEAN_EXPRESSION"></el-option>
-            <el-option label="直接映射" value="DIRECT"></el-option>
             <el-option label="单值映射" value="SINGLE_MAP"></el-option>
           </el-select>
         </el-form-item>
