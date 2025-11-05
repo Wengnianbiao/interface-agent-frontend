@@ -87,9 +87,9 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="入参元信息" prop="contentMateInfo">
+        <el-form-item label="入参元信息" prop="contentMetaInfo">
           <el-input 
-            v-model="form.contentMateInfo" 
+            v-model="form.contentMetaInfo" 
             type="textarea"
             :rows="3"
             placeholder="请输入入参元信息">
@@ -148,7 +148,7 @@ export default {
         flowName: '',
         interfaceUri: '',
         contentType: 'JSON', // 默认值设为JSON
-        contentMateInfo: '',
+        contentMetaInfo: '',
         firstFlowNodes: [],
         status: 1
       },
@@ -252,7 +252,7 @@ export default {
         flowName: row.flowName,
         interfaceUri: row.interfaceUri,
         contentType: row.contentType,
-        contentMateInfo: row.contentMateInfo,
+        contentMetaInfo: row.contentMetaInfo,
         firstFlowNodes: row.firstFlowNodes,
         status: row.status
       };
@@ -267,7 +267,7 @@ export default {
         flowName: row.flowName + '（副本）',
         interfaceUri: row.interfaceUri,
         contentType: row.contentType,
-        contentMateInfo: row.contentMateInfo,
+        contentMetaInfo: row.contentMetaInfo,
         firstFlowNodes: row.firstFlowNodes,
         status: row.status
       };
@@ -299,7 +299,7 @@ export default {
         flowName: '',
         interfaceUri: '',
         contentType: 'JSON', // 重置时默认JSON
-        contentMateInfo: '',
+        contentMetaInfo: '',
         firstFlowNodes: [],
         status: 1
       };
