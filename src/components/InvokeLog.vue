@@ -4,10 +4,14 @@
 
     <el-form :inline="true" :model="searchForm" class="search-form">
       <el-form-item label="接口名称">
-        <el-select v-model="searchForm.nodeId" placeholder="请选择接口" clearable>
-          <el-option label="全部" value=""></el-option>
-          <el-option v-for="node in nodeOptions" :key="node.nodeId" :label="node.nodeName" :value="node.nodeId"></el-option>
-        </el-select>
+        <!-- 改为支持输入+下拉的组合框 -->
+        <el-autocomplete
+          v-model="searchForm.nodeName"
+          :fetch-suggestions="queryNodeName"
+          placeholder="请选择或输入接口名称"
+          clearable
+          @select="handleNodeSelect"
+        ></el-autocomplete>
       </el-form-item>
 
       <el-form-item label="关键字">
@@ -24,7 +28,7 @@
     <el-table :data="logList" style="width: 100%" v-loading="loading">
       <el-table-column label="接口名称" min-width="150">
         <template #default="scope">
-          {{ nodeMap.get(scope.row.nodeId) || scope.row.nodeId }}
+          {{ scope.row.nodeName || scope.row.nodeId || '-' }}
         </template>
       </el-table-column>
 
@@ -149,7 +153,7 @@ export default {
   data() {
     return {
       searchForm: {
-        nodeId: '',
+        nodeName: '', // 改为nodeName查询
         keyword: ''
       },
       logList: [],
@@ -163,8 +167,7 @@ export default {
       dialogTitle: '',
       currentJson: '',
       parsedJson: null,
-      nodeOptions: [],
-      nodeMap: new Map(),
+      nodeOptions: [], // 存储所有节点名称列表
       isXmlContent: false // 控制是否为 XML 内容
     };
   },
@@ -177,10 +180,7 @@ export default {
         const response = await fetchNodeList();
         if (response.status === 200 && response.data.code === '200') {
           this.nodeOptions = response.data.rsp || [];
-          this.nodeMap = new Map();
-          this.nodeOptions.forEach(node => {
-            this.nodeMap.set(node.nodeId, node.nodeName);
-          });
+          // 初始化时默认加载所有日志
           this.fetchLogList();
         } else {
           this.$message.error('获取节点列表失败: ' + response.data.message);
@@ -194,7 +194,7 @@ export default {
       this.loading = true;
       try {
         const params = {
-          nodeId: this.searchForm.nodeId || undefined,
+          nodeName: this.searchForm.nodeName || undefined, // 传递nodeName参数
           keyword: this.searchForm.keyword || undefined,
           pageNum: this.pagination.pageNum,
           pageSize: this.pagination.pageSize
@@ -220,7 +220,7 @@ export default {
     },
 
     handleReset() {
-      this.searchForm.nodeId = '';
+      this.searchForm.nodeName = ''; // 重置nodeName
       this.searchForm.keyword = '';
       this.pagination.pageNum = 1;
       this.fetchLogList();
@@ -235,6 +235,27 @@ export default {
     handleCurrentChange(val) {
       this.pagination.pageNum = val;
       this.fetchLogList();
+    },
+
+    // 搜索节点名称建议
+    queryNodeName(queryString, callback) {
+      if (!this.nodeOptions.length) {
+        callback([]);
+        return;
+      }
+      // 过滤包含查询字符串的节点名称
+      const results = this.nodeOptions.filter(node => 
+        node.nodeName.toLowerCase().includes(queryString.toLowerCase())
+      ).map(node => ({
+        value: node.nodeName,
+        label: node.nodeName
+      }));
+      callback(results);
+    },
+
+    // 选择节点名称回调
+    handleNodeSelect(item) {
+      this.searchForm.nodeName = item.value;
     },
 
     formatJsonPreview(str) {
@@ -464,5 +485,10 @@ export default {
   text-align: left !important;
   padding: 0 !important;
   margin: 0 !important;
+}
+
+/*  autocomplete 样式优化 */
+.el-autocomplete {
+  width: 240px;
 }
 </style>

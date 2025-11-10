@@ -128,6 +128,10 @@
           <el-input v-model="form.keywordField" placeholder="请输入关键字字段名"></el-input>
         </el-form-item>
 
+        <el-form-item label="拆分字段" prop="splitField">
+          <el-input v-model="form.splitField" placeholder="请输入拆分字段名(必须为数组)"></el-input>
+        </el-form-item>
+
         <el-form-item label="节点元数据信息" prop="metaInfo">
           <el-input
             v-model="form.metaInfo"
@@ -218,7 +222,8 @@ export default {
         scheduleExpr: '',
         paramFilterExpr: '',
         keywordField: '',
-        remoteExtension: '' // 添加新字段
+        splitField: '', 
+        remoteExtension: ''
       },
       rules: {
         nodeName: [
@@ -350,7 +355,8 @@ export default {
       copied.scheduleExpr = '';
       copied.paramFilterExpr = '';
       copied.keywordField = '';
-      copied.remoteExtension = ''; // 复制时清空SPI拓展字段
+      copied.splitField = ''; // 复制时清空分割字段
+      copied.remoteExtension = '';
 
       this.form = copied;
       this.dialogTitle = '复制节点';
@@ -492,7 +498,8 @@ export default {
         scheduleExpr: '',
         paramFilterExpr: '',
         keywordField: '',
-        remoteExtension: '' // 重置时也清空新字段
+        splitField: '', // 重置时也清空分割字段
+        remoteExtension: ''
       };
     },
 
