@@ -17,7 +17,7 @@
           <el-option label="后置处理" value="POST_PROCESS"></el-option>
         </el-select>
       </el-form-item>
-      
+
       <!-- 新增的targetParam搜索框 -->
       <el-form-item label="目标参数名">
         <el-input v-model="searchForm.targetParam" placeholder="请输入目标参数名" clearable></el-input>
@@ -42,6 +42,11 @@
           <el-tag :type="scope.row.processType === 'PRE_PROCESS' ? 'primary' : 'success'">
             {{ scope.row.processType === 'PRE_PROCESS' ? '前置处理' : '后置处理' }}
           </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column prop="mappingSource" label="映射来源" width="120" v-if="showMappingSourceColumn">
+        <template #default="scope">
+          <el-tag size="small">{{ scope.row.mappingSource}}</el-tag>
         </template>
       </el-table-column>
       <el-table-column prop="paramDesc" label="参数描述" show-overflow-tooltip width="200"></el-table-column>
@@ -75,29 +80,29 @@
 
     <!-- 分页组件 -->
     <el-pagination
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-      :current-page="pagination.pageNum"
-      :page-sizes="[10, 20, 50, 100]"
-      :page-size="pagination.pageSize"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="pagination.total"
-      style="margin-top: 20px; text-align: right;"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="pagination.pageNum"
+        :page-sizes="[10, 20, 50, 100]"
+        :page-size="pagination.pageSize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="pagination.total"
+        style="margin-top: 20px; text-align: right;"
     >
     </el-pagination>
 
     <!-- 编辑/新增对话框 -->
     <el-dialog
-      :title="dialogTitle"
-      :visible.sync="editDialogVisible"
-      width="600px"
-      @close="resetEditForm"
+        :title="dialogTitle"
+        :visible.sync="editDialogVisible"
+        width="600px"
+        @close="resetEditForm"
     >
       <el-form
-        :model="editForm"
-        :rules="editRules"
-        ref="editForm"
-        label-width="120px"
+          :model="editForm"
+          :rules="editRules"
+          ref="editForm"
+          label-width="120px"
       >
         <el-form-item label="节点" prop="nodeId">
           <el-select v-model="editForm.nodeId" placeholder="请选择节点">
@@ -111,12 +116,26 @@
           </el-select>
         </el-form-item>
 
+        <el-form-item label="映射来源" prop="mappingSource" v-if="editForm.processType === 'POST_PROCESS'">
+          <el-select v-model="editForm.mappingSource" placeholder="请选择映射来源" clearable>
+            <el-option label="上游响应" value="RESPONSE"></el-option>
+            <el-option label="原始入参" value="INPUT"></el-option>
+          </el-select>
+          <el-tooltip
+              content="映射来源用于指定目标参数从哪里获取：上游响应表示来自接口响应结果；原始入参表示来自原始请求参数；空值表示不区分。"
+              placement="top"
+              effect="light"
+          >
+            <i class="el-icon-question" style="color: orange; margin-left: 10px; cursor: pointer;"></i>
+          </el-tooltip>
+        </el-form-item>
+
         <!-- 源参数名：当源参数类型为NONE时隐藏 -->
-        <el-form-item 
-          label="源参数名" 
-          prop="sourceParamKey"
-          v-if="editForm.sourceParamType !== 'NONE'"
-          
+        <el-form-item
+            label="源参数名"
+            prop="sourceParamKey"
+            v-if="editForm.sourceParamType !== 'NONE'"
+
         >
           <el-input v-model="editForm.sourceParamKey" placeholder="请输入源参数名"></el-input>
         </el-form-item>
@@ -151,20 +170,20 @@
         </el-form-item>
 
         <!-- 仅当目标参数类型为对象时显示 -->
-        <el-form-item 
-          label="保留单元素Key" 
-          prop="keepSingleElementKey"
-          v-if="editForm.targetParamType === 'OBJECT'"
+        <el-form-item
+            label="保留单元素Key"
+            prop="keepSingleElementKey"
+            v-if="editForm.targetParamType === 'OBJECT'"
         >
           <el-switch
-            v-model="editForm.keepSingleElementKey"
-            active-text=""
-            inactive-text="">
+              v-model="editForm.keepSingleElementKey"
+              active-text=""
+              inactive-text="">
           </el-switch>
           <el-tooltip
-            content="当对象中只有一个元素时是否保留key"
-            placement="top"
-            effect="light"
+              content="当对象中只有一个元素时是否保留key"
+              placement="top"
+              effect="light"
           >
             <i class="el-icon-question" style="color: orange; margin-left: 14px; cursor: pointer;"></i>
           </el-tooltip>
@@ -172,11 +191,11 @@
 
         <el-form-item label="父参数" prop="parentId">
           <el-select v-model="editForm.parentId" placeholder="请选择父参数" clearable>
-            <el-option 
-              v-for="config in configParentOptions" 
-              :key="config.configId" 
-              :label="`${config.targetParamKey} (${config.paramDesc || '无描述'})`" 
-              :value="config.configId"
+            <el-option
+                v-for="config in configParentOptions"
+                :key="config.configId"
+                :label="`${config.targetParamKey} (${config.paramDesc || '无描述'})`"
+                :value="config.configId"
             ></el-option>
           </el-select>
         </el-form-item>
@@ -193,19 +212,19 @@
 
         <el-form-item label="映射规则" prop="mappingRule">
           <el-input
-            v-model="editForm.mappingRule"
-            type="textarea"
-            :rows="4"
-            placeholder="请输入映射规则"
+              v-model="editForm.mappingRule"
+              type="textarea"
+              :rows="4"
+              placeholder="请输入映射规则"
           ></el-input>
         </el-form-item>
 
         <el-form-item label="参数描述" prop="paramDesc">
           <el-input
-            v-model="editForm.paramDesc"
-            type="textarea"
-            :rows="2"
-            placeholder="请输入参数描述，用于说明目标参数的业务用途"
+              v-model="editForm.paramDesc"
+              type="textarea"
+              :rows="2"
+              placeholder="请输入参数描述，用于说明目标参数的业务用途"
           ></el-input>
         </el-form-item>
       </el-form>
@@ -220,6 +239,11 @@
 
 <script>
 import request from '@/utils/request';
+
+export const MappingSource = {
+  RESPONSE: 'RESPONSE',
+  INPUT: 'INPUT'
+};
 
 export default {
   name: 'NodeParamConfig',
@@ -251,7 +275,8 @@ export default {
         processType: '',
         mappingType: '',
         mappingRule: '',
-        paramDesc: ''
+        paramDesc: '',
+        mappingSource: ''
       },
       editRules: {
         nodeId: [
@@ -283,13 +308,17 @@ export default {
         ],
         paramDesc: [
           { required: false, message: '请输入参数描述', trigger: 'blur' }
+        ],
+        mappingSource: [
+          { required: false, message: '请选择映射来源', trigger: 'change' }
         ]
       },
       nodeOptions: [],
       nodeMap: new Map(),
       configParentOptions: [],
       configParentMap: new Map(),
-      allParentConfigs: []
+      allParentConfigs: [],
+      showMappingSourceColumn: false // 控制表格中映射来源列的显示
     };
   },
   mounted() {
@@ -309,6 +338,7 @@ export default {
       }
     },
     'editForm.processType': function(newVal) {
+      this.showMappingSourceColumn = this.configList.some(item => item.processType === 'POST_PROCESS');
       if (newVal) {
         this.fetchConfigParentList();
       }
@@ -323,14 +353,14 @@ export default {
   methods: {
     getParentParamName(parentId) {
       if (!parentId) return '';
-      
+
       const parentConfig = this.allParentConfigs.find(item => item.configId === parentId);
       if (parentConfig) {
         return `${parentConfig.targetParamKey} (${parentConfig.paramDesc || '无描述'})`;
       }
-      
+
       this.fetchParentParamDetails(parentId);
-      
+
       return parentId;
     },
 
@@ -338,10 +368,10 @@ export default {
       if (this.loadingParentIds && this.loadingParentIds.includes(parentId)) {
         return;
       }
-      
+
       this.loadingParentIds = this.loadingParentIds || [];
       this.loadingParentIds.push(parentId);
-      
+
       try {
         const response = await request.get(`/v1/console/node-param/${parentId}`);
         if (response.status === 200 && response.data.code === '200') {
@@ -413,7 +443,8 @@ export default {
           const pageList = response.data.rsp;
           this.configList = pageList.rows || [];
           this.pagination.total = pageList.total || 0;
-          
+
+          this.showMappingSourceColumn = this.configList.some(item => item.processType === 'POST_PROCESS');
           this.loadMissingParentConfigs();
         } else {
           this.$message.error('获取参数配置列表失败: ' + response.data.message);
@@ -432,14 +463,14 @@ export default {
           parentIds.add(item.parentId);
         }
       });
-      
+
       const missingParentIds = [];
       parentIds.forEach(id => {
         if (!this.allParentConfigs.some(config => config.configId === id)) {
           missingParentIds.push(id);
         }
       });
-      
+
       missingParentIds.forEach(id => {
         this.fetchParentParamDetails(id);
       });
@@ -455,7 +486,7 @@ export default {
         const response = await request.get('/v1/console/node-param/all-unpaged', { params });
         if (response.status === 200 && response.data.code === '200') {
           this.configParentOptions = (response.data.rsp || []).filter(
-            config => !this.editForm.configId || config.configId !== this.editForm.configId
+              config => !this.editForm.configId || config.configId !== this.editForm.configId
           );
         } else {
           this.$message.error('获取父参数列表失败: ' + response.data.message);
@@ -490,14 +521,19 @@ export default {
     },
 
     handleEdit(row) {
-      this.editForm = { ...row };
+      this.editForm = { ...row, mappingSource: row.mappingSource };
       this.editDialogVisible = true;
       this.dialogTitle = '编辑参数配置';
       this.fetchConfigParentList();
     },
 
     handleCopy(row) {
-      this.editForm = { ...row, configId: '', paramDesc: row.paramDesc || '' };
+      this.editForm = {
+        ...row,
+        configId: '',
+        paramDesc: row.paramDesc || '',
+        mappingSource: row.mappingSource
+      };
       this.editDialogVisible = true;
       this.dialogTitle = '复制参数配置';
       this.fetchConfigParentList();
@@ -542,7 +578,8 @@ export default {
         processType: '',
         mappingType: '',
         mappingRule: '',
-        paramDesc: ''
+        paramDesc: '',
+        mappingSource: null
       };
       this.configParentOptions = [];
     },
@@ -552,20 +589,27 @@ export default {
         if (valid) {
           try {
             const submitData = { ...this.editForm };
-            
+
             if (submitData.sourceParamType === 'NONE') {
               submitData.sourceParamKey = null;
             }
-            
+
             if (submitData.parentId === '') {
               submitData.parentId = null;
             }
-            
+
             // 当目标参数类型不是OBJECT时，不传递keepSingleElementKey字段
             if (submitData.targetParamType !== 'OBJECT') {
               delete submitData.keepSingleElementKey;
             }
-            
+
+            // 处理mappingSource的默认值
+            if (submitData.processType !== 'POST_PROCESS') {
+              delete submitData.mappingSource;
+            } else if (submitData.mappingSource === null || submitData.mappingSource === '') {
+              submitData.mappingSource = null;
+            }
+
             let response;
             if (submitData.configId) {
               response = await request.post('/v1/console/node-param/update', submitData);

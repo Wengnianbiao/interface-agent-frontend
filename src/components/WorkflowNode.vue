@@ -120,7 +120,6 @@
             <el-option label="HTTP" value="HTTP"></el-option>
             <el-option label="WEBSERVICE" value="WEBSERVICE"></el-option>
             <el-option label="数据库" value="DATABASE"></el-option>
-            <el-option label="WEBSERVICE-JSON" value="WEBSERVICE_JSON"></el-option>
           </el-select>
         </el-form-item>
 
