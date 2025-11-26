@@ -340,15 +340,6 @@ export default {
           }
         }
       });
-    },
-    
-    // 移除ID字段的辅助函数
-    removeIdFields(obj) {
-      const result = { ...obj };
-      // delete result.flowId;
-      // delete result.nodeId;
-      // delete result.configId;
-      return result;
     }
   }
 };

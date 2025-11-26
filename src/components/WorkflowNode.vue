@@ -24,9 +24,10 @@
           </el-select>
         </div>
 
-        <!-- 操作按钮 -->
+        <!-- 操作按钮：新增全局导入按钮在新增左侧 -->
         <div style="display: flex; gap: 10px;">
           <el-button @click="resetFilters">重置</el-button>
+          <el-button type="primary" @click="handleGlobalImportClick">导入节点</el-button>
           <el-button type="success" @click="handleAdd">新增</el-button>
         </div>
       </div>
@@ -55,16 +56,17 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="操作" width="450" fixed="right" header-align="center">
+      <el-table-column label="操作" width="500" fixed="right" header-align="center">
         <template #default="scope">
-          <!-- 第一行：基础操作按钮 -->
+          <!-- 第一行：基础操作按钮 - 全局导出移至编辑左侧 -->
           <div style="display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 8px;">
+            <el-button size="small" @click="exportNodeConfig(scope.row)">导出节点</el-button>
             <el-button size="small" @click="handleEdit(scope.row)">编辑</el-button>
             <el-button size="small" @click="handleCopy(scope.row)">复制</el-button>
             <el-button size="small" type="danger" @click="handleDelete(scope.row)">删除</el-button>
           </div>
 
-          <!-- 第二行：导出导入 + 全量删除配置按钮 -->
+          <!-- 第二行：原有行级导入导出 + 全量删除配置按钮 -->
           <div style="display: flex; justify-content: flex-end; gap: 8px;">
             <el-button size="small" type="warning" @click="exportNodeParams(scope.row)">导出参数配置</el-button>
             <el-button size="small" type="primary" @click="handleImportClick(scope.row)">导入参数配置</el-button>
@@ -136,7 +138,7 @@
             v-model="form.metaInfo"
             type="textarea"
             :rows="4"
-            placeholder="请输入JSON格式的元数据，例如：{&quot;url&quot;:&quot;http://xxx&quot;,&quot;method&quot;:&quot;POST&quot;}"
+            placeholder='请输入JSON格式的元数据，例如：{"url":"http://xxx","method":"POST","headers":{"Content-Type":"application/json"}}'
           ></el-input>
         </el-form-item>
 
@@ -395,6 +397,51 @@ export default {
       }).catch(() => {});
     },
 
+    // 全局节点配置导出（行级）
+    async exportNodeConfig(row) {
+      if (!row.nodeId) {
+        this.$message.error('节点ID不存在，无法导出节点配置');
+        return;
+      }
+
+      try {
+        this.loading = true;
+        const response = await request.get(`/v1/console/node/export-node/${row.nodeId}`);
+
+        if (response.status !== 200 || response.data.code !== '200') {
+          const errorMsg = response.data?.message || '导出接口响应异常';
+          this.$message.error(`节点配置导出失败: ${ errorMsg }`);
+          return;
+        }
+
+        const exportData = response.data.rsp;
+        if (!exportData) {
+          this.$message.info('该节点没有配置数据');
+          return;
+        }
+
+        const dataStr = JSON.stringify(exportData, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json; charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${row.nodeName}_节点配置_${new Date().getTime()}.json`;
+        document.body.appendChild(link);
+        link.click();
+
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        this.$message.success('节点配置导出成功');
+      } catch (error) {
+        const errorMsg = error?.message || '未知错误';
+        this.$message.error(`节点配置导出失败: ${ errorMsg }`);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // 原有行级参数配置导出
     async exportNodeParams(row) {
       if (!row.nodeId) {
         this.$message.error('节点ID不存在，无法导出参数配置');
@@ -438,7 +485,54 @@ export default {
       }
     },
 
-    // 处理文件上传（适配动态 input）
+    // 全局节点配置导入（搜索栏按钮）
+    handleGlobalImportClick() {
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = '.json';
+      fileInput.onchange = (e) => {
+        if (e.target.files.length > 0) {
+          this.handleGlobalFileUpload(e);
+        }
+      };
+      fileInput.click();
+    },
+
+    // 全局节点配置导入处理
+    async handleGlobalFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
+        this.$message.error('请上传JSON格式的文件');
+        return;
+      }
+
+      try {
+        this.loading = true;
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await request.post('/v1/console/node/import-node', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+
+        if (response.status === 200 && response.data.code === '200') {
+          this.$message.success('节点配置导入成功');
+          this.fetchNodes(); // 导入成功后刷新列表
+        } else {
+          this.$message.error('节点配置导入失败: ' + (response.data.message || '未知错误'));
+        }
+      } catch (error) {
+        this.$message.error('节点配置导入失败: ' + error.message);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // 原有行级参数配置导入点击
     handleImportClick(row) {
       this.currentNode = row;
       const fileInput = document.createElement('input');
@@ -452,6 +546,7 @@ export default {
       fileInput.click();
     },
 
+    // 原有行级参数配置导入处理
     async handleFileUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
