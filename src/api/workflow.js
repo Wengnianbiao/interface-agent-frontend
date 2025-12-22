@@ -12,6 +12,16 @@ export function getWorkflows(params) {
 }
 
 /**
+ * 获取所有工作流（无分页）
+ */
+export function getAllWorkflowsUnpaged() {
+  return request({
+    url: '/v1/console/workflow/all-unpaged',
+    method: 'get'
+  })
+}
+
+/**
  * 删除工作流
  */
 export function deleteWorkflow(flowId) {

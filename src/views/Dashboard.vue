@@ -1,4 +1,4 @@
-<!-- src/components/Dashboard.vue -->
+<!-- src/views/Dashboard.vue -->
 <template>
   <div class="dashboard">
     <h1>系统仪表板</h1>
@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import LatestInvokeTime from './InvokeTimeBoard.vue';
+import LatestInvokeTime from '@/components/InvokeTimeBoard.vue';
 
 export default {
   name: 'SystemDashboard',

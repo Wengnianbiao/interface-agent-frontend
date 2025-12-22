@@ -20,23 +20,39 @@
           <i class="el-icon-document"></i>
           <span>工作流管理</span>
         </template>
-        <el-menu-item index="2-1">工作流管理</el-menu-item>
-        <el-menu-item index="2-2">接口管理</el-menu-item>
-        <el-menu-item index="2-3">接口参数配置管理</el-menu-item>
-        <el-menu-item index="2-4">接口调用日志</el-menu-item>
+        <el-menu-item index="2-1">工作流列表</el-menu-item>
+        <el-menu-item index="2-2">工作流节点</el-menu-item>
+        <el-menu-item index="2-3">节点参数配置</el-menu-item>
       </el-submenu>
       <el-menu-item index="3">
+        <i class="el-icon-document-copy"></i>
+        <span slot="title">接口调用日志</span>
+      </el-menu-item>
+      <el-submenu index="4">
+        <template slot="title">
+          <i class="el-icon-set-up"></i>
+          <span>Mock</span>
+        </template>
+        <el-menu-item index="4-1">Mock响应配置</el-menu-item>
+        <el-menu-item index="4-2">Mock调用测试</el-menu-item>
+        <el-menu-item index="4-3">Jarvis入参模板</el-menu-item>
+      </el-submenu>
+      <el-menu-item index="5">
+        <i class="el-icon-cpu"></i>
+        <span slot="title">SPI节点扩展</span>
+      </el-menu-item>
+      <el-menu-item index="6">
         <i class="el-icon-setting"></i>
         <span slot="title">系统设置</span>
       </el-menu-item>
-      <el-submenu index="4">
+      <el-submenu index="7">
         <template slot="title">
           <i class="el-icon-user"></i>
           <span>用户中心</span>
         </template>
-        <el-menu-item index="4-1">个人信息</el-menu-item>
-        <el-menu-item index="4-2">修改密码</el-menu-item>
-        <el-menu-item index="4-3">退出登录</el-menu-item>
+        <el-menu-item index="7-1">个人信息</el-menu-item>
+        <el-menu-item index="7-2">修改密码</el-menu-item>
+        <el-menu-item index="7-3">退出登录</el-menu-item>
       </el-submenu>
     </el-menu>
   </div>
@@ -74,17 +90,37 @@ export default {
             this.$router.push('/workflow/node/param/config');
           }
           break;
-        case '2-4':
+        case '3':
           if (currentPath !== '/invoke/log') {
             this.$router.push('/invoke/log');
           }
           break;
-        case '3':
+        case '4-1':
+          if (currentPath !== '/mock/config') {
+            this.$router.push('/mock/config');
+          }
+          break;
+        case '4-2':
+          if (currentPath !== '/mock/log') {
+            this.$router.push('/mock/log');
+          }
+          break;
+        case '4-3':
+          if (currentPath !== '/jarvis/templates') {
+            this.$router.push('/jarvis/templates');
+          }
+          break;
+        case '5':
+          if (currentPath !== '/node/extension') {
+            this.$router.push('/node/extension');
+          }
+          break;
+        case '6':
           if (currentPath !== '/settings') {
             this.$router.push('/settings');
           }
           break;
-        case '4-3':
+        case '7-3':
           console.log('退出登录');
           break;
         default:
@@ -103,9 +139,17 @@ export default {
     } else if (currentPath === '/workflow/node/param/config') {
       this.activeIndex = '2-3';
     } else if (currentPath === '/invoke/log') {
-      this.activeIndex = '2-4';
-    } else if (currentPath === '/settings') {
       this.activeIndex = '3';
+    } else if (currentPath === '/mock/config') {
+      this.activeIndex = '4-1';
+    } else if (currentPath === '/mock/log') {
+      this.activeIndex = '4-2';
+    } else if (currentPath === '/jarvis/templates') {
+      this.activeIndex = '4-3';
+    } else if (currentPath === '/node/extension') {
+      this.activeIndex = '5';
+    } else if (currentPath === '/settings') {
+      this.activeIndex = '6';
     }
   },
   watch: {
@@ -119,9 +163,17 @@ export default {
       } else if (to.path === '/workflow/node/param/config') {
         this.activeIndex = '2-3';
       } else if (to.path === '/invoke/log') {
-        this.activeIndex = '2-4';
-      } else if (to.path === '/settings') {
         this.activeIndex = '3';
+      } else if (to.path === '/mock/config') {
+        this.activeIndex = '4-1';
+      } else if (to.path === '/mock/log') {
+        this.activeIndex = '4-2';
+      } else if (to.path === '/jarvis/templates') {
+        this.activeIndex = '4-3';
+      } else if (to.path === '/node/extension') {
+        this.activeIndex = '5';
+      } else if (to.path === '/settings') {
+        this.activeIndex = '6';
       }
     }
   }
@@ -160,5 +212,11 @@ export default {
 
 .el-submenu .el-menu {
   background-color: #545c64;
+}
+
+/* 子菜单项添加左边距 */
+.el-submenu .el-menu-item {
+  padding-left: 50px !important;
+  min-width: 200px;
 }
 </style>

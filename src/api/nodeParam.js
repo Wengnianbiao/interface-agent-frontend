@@ -53,3 +53,13 @@ export function deleteNodeParam(configId) {
     method: 'delete'
   })
 }
+
+/**
+ * 获取单个节点参数配置详情
+ */
+export function getNodeParamDetail(configId) {
+  return request({
+    url: `/v1/console/node-param/${configId}`,
+    method: 'get'
+  })
+}

@@ -4,7 +4,7 @@ import axios from 'axios';
 const service = axios.create({
   // 使用环境变量中的API基础路径
   baseURL: process.env.VUE_APP_BASE_API,
-  timeout: 5000
+  timeout: 10000
 });
 
 export default service;
