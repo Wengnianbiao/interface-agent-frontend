@@ -1,30 +1,30 @@
 <template>
   <div class="mock-config">
-    <h2>Mock响应配置</h2>
-
     <!-- 筛选表单 -->
-    <el-form :inline="true" class="search-form">
-      <el-form-item label="节点筛选">
-        <el-select 
-          v-model="filterNodeId" 
-          placeholder="请选择节点" 
-          clearable
-          filterable
-          @change="handleFilterChange"
-        >
-          <el-option
-            v-for="node in nodeOptions"
-            :key="node.nodeId"
-            :label="node.nodeName"
-            :value="node.nodeId"
-          ></el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item>
-        <el-button @click="resetFilters">重置</el-button>
-        <el-button type="primary" @click="handleAdd">新增Mock配置</el-button>
-      </el-form-item>
-    </el-form>
+    <div style="margin-bottom: 20px; background-color: #f5f7fa; padding: 20px; border-radius: 4px;">
+      <el-form :inline="true" style="display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;">
+        <el-form-item label="节点筛选">
+          <el-select 
+            v-model="filterNodeId" 
+            placeholder="请选择节点" 
+            clearable
+            filterable
+            @change="handleFilterChange"
+          >
+            <el-option
+              v-for="node in nodeOptions"
+              :key="node.nodeId"
+              :label="node.nodeName"
+              :value="node.nodeId"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button @click="resetFilters">重置</el-button>
+          <el-button type="primary" @click="handleAdd">新增Mock配置</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
 
     <!-- Mock配置表格 -->
     <el-table :data="mockList" v-loading="loading" style="width: 100%">

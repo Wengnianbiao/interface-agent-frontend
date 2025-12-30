@@ -1,27 +1,27 @@
 <template>
   <div class="invoke-log">
-    <h2>接口调用日志</h2>
+    <div style="margin-bottom: 20px; background-color: #f5f7fa; padding: 20px; border-radius: 4px;">
+      <el-form :inline="true" :model="searchForm" style="display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;">
+        <el-form-item label="接口名称">
+          <el-autocomplete
+            v-model="searchForm.nodeName"
+            :fetch-suggestions="queryNodeName"
+            placeholder="请选择或输入接口名称"
+            clearable
+            @select="handleNodeSelect"
+          ></el-autocomplete>
+        </el-form-item>
 
-    <el-form :inline="true" :model="searchForm" class="search-form">
-      <el-form-item label="接口名称">
-        <el-autocomplete
-          v-model="searchForm.nodeName"
-          :fetch-suggestions="queryNodeName"
-          placeholder="请选择或输入接口名称"
-          clearable
-          @select="handleNodeSelect"
-        ></el-autocomplete>
-      </el-form-item>
+        <el-form-item label="关键字">
+          <el-input v-model="searchForm.keyword" placeholder="请输入关键字" clearable></el-input>
+        </el-form-item>
 
-      <el-form-item label="关键字">
-        <el-input v-model="searchForm.keyword" placeholder="请输入关键字" clearable></el-input>
-      </el-form-item>
-
-      <el-form-item>
-        <el-button type="primary" @click="handleSearch">查询</el-button>
-        <el-button @click="handleReset">重置</el-button>
-      </el-form-item>
-    </el-form>
+        <el-form-item>
+          <el-button type="primary" @click="handleSearch">查询</el-button>
+          <el-button @click="handleReset">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
 
     <!-- 日志表格 -->
     <el-table :data="logList" style="width: 100%" v-loading="loading">

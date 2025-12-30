@@ -1,7 +1,5 @@
 <template>
   <div class="java-code-editor">
-    <h2>SPI节点扩展配置管理</h2>
-
     <!-- 工具栏 -->
     <el-form :inline="true" class="toolbar">
       <el-form-item>
@@ -26,6 +24,13 @@
       </el-table-column>
       <el-table-column prop="extensionName" label="扩展名称" width="150"></el-table-column>
       <el-table-column prop="className" label="实现类" min-width="200" show-overflow-tooltip></el-table-column>
+      <el-table-column label="扩展方式" width="100" align="center">
+        <template slot-scope="scope">
+          <el-tag :type="scope.row.extensionMode === 'ONLINE' ? 'success' : 'primary'" size="small">
+            {{ scope.row.extensionMode === 'ONLINE' ? '在线扩展' : '项目扩展' }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column prop="description" label="描述" min-width="150" show-overflow-tooltip></el-table-column>
       <el-table-column prop="enabled" label="状态" width="80" align="center">
         <template slot-scope="scope">
@@ -37,11 +42,11 @@
       <el-table-column label="操作" width="180" fixed="right">
         <template slot-scope="scope">
           <el-button size="mini" @click="handleEdit(scope.row)" icon="el-icon-edit">编辑</el-button>
-          <el-button 
-            v-if="scope.row.enabled === 1" 
-            size="mini" 
-            type="danger" 
-            @click="handleDisable(scope.row)" 
+          <el-button
+            v-if="scope.row.enabled === 1"
+            size="mini"
+            type="danger"
+            @click="handleDisable(scope.row)"
             icon="el-icon-close"
           >禁用</el-button>
         </template>
@@ -58,48 +63,68 @@
     >
       <el-form :model="extensionForm" label-width="120px" ref="extensionForm" :rules="formRules">
         <el-form-item label="关联节点" prop="nodeId">
-          <el-select 
-            v-model="extensionForm.nodeId" 
-            placeholder="请选择要关联的节点" 
+          <el-select
+            v-model="extensionForm.nodeId"
+            placeholder="请选择要关联的节点"
             style="width: 100%"
             filterable
           >
-            <el-option 
-              v-for="node in nodeList" 
-              :key="node.nodeId" 
-              :label="node.nodeName" 
+            <el-option
+              v-for="node in nodeList"
+              :key="node.nodeId"
+              :label="node.nodeName"
               :value="node.nodeId"
             ></el-option>
           </el-select>
-          <span class="form-tip">保存后会自动更新节点的 remoteExtension 字段</span>
         </el-form-item>
 
         <el-form-item label="扩展名称" prop="extensionName">
-          <el-input 
-            v-model="extensionForm.extensionName" 
-            placeholder="例如: custom-http"
+          <el-input
+            v-model="extensionForm.extensionName"
+            placeholder="例如: pacs"
             :disabled="isEdit"
           ></el-input>
-          <span class="form-tip">用于节点配置中的 remoteExtension 字段关联</span>
         </el-form-item>
 
         <el-form-item label="实现类全名" prop="className">
-          <el-input 
-            v-model="extensionForm.className" 
+          <el-input
+            v-model="extensionForm.className"
             placeholder="例如: com.helianhealth.agent.custom.MyRemoteInvoker"
           ></el-input>
         </el-form-item>
 
         <el-form-item label="描述" prop="description">
-          <el-input 
-            v-model="extensionForm.description" 
-            type="textarea" 
+          <el-input
+            v-model="extensionForm.description"
+            type="textarea"
             :rows="2"
             placeholder="请输入扩展描述"
           ></el-input>
         </el-form-item>
 
-        <el-form-item label="Java源代码" prop="sourceCode">
+        <el-form-item label="扩展方式" prop="extensionMode" required>
+          <el-radio-group v-model="extensionForm.extensionMode">
+            <el-radio label="ONLINE">
+              <span style="font-weight: 600;">在线扩展</span>
+              <span style="color: #909399; font-size: 12px; margin-left: 8px;">（在管理页面编写代码）</span>
+            </el-radio>
+            <el-radio label="PROJECT">
+              <span style="font-weight: 600;">项目扩展</span>
+              <span style="color: #909399; font-size: 12px; margin-left: 8px;">（在业务项目中实现接口）</span>
+            </el-radio>
+          </el-radio-group>
+          <div style="color: #67C23A; font-size: 12px; margin-top: 8px; line-height: 1.6;" v-if="extensionForm.extensionMode === 'ONLINE'">
+            <i class="el-icon-success"></i> <strong>适用场景：</strong>简单快速实现，无需重启应用，代码即时生效
+          </div>
+          <div style="color: #409EFF; font-size: 12px; margin-top: 8px; line-height: 1.6;" v-if="extensionForm.extensionMode === 'PROJECT'">
+            <i class="el-icon-info"></i> <strong>适用场景：</strong>复杂业务逻辑，可引入依赖、使用Spring注入，享受完整IDE开发体验
+          </div>
+          <div style="color: #E6A23C; font-size: 12px; margin-top: 8px;" v-if="extensionForm.extensionMode === 'PROJECT'">
+            <i class="el-icon-warning"></i> <strong>注意：</strong>请确保在项目中已正确实现了 <code style="background: #f5f7fa; padding: 2px 6px; border-radius: 3px;">{{ extensionForm.className }}</code> 类
+          </div>
+        </el-form-item>
+
+        <el-form-item label="Java源代码" prop="sourceCode" v-if="extensionForm.extensionMode === 'ONLINE'">
           <el-input
             v-model="extensionForm.sourceCode"
             type="textarea"
@@ -115,11 +140,11 @@
         </el-form-item>
 
         <el-form-item label="状态" prop="enabled">
-          <el-switch 
-            v-model="extensionForm.enabled" 
-            :active-value="1" 
+          <el-switch
+            v-model="extensionForm.enabled"
+            :active-value="1"
             :inactive-value="0"
-            active-text="启用" 
+            active-text="启用"
             inactive-text="禁用"
           ></el-switch>
         </el-form-item>
@@ -167,12 +192,12 @@
 
 <script>
 import { Message, MessageBox } from 'element-ui';
-import { 
-  getEnabledConfigs, 
-  getLoadedExtensions, 
-  registerExtension, 
-  updateExtension, 
-  disableExtension 
+import {
+  getEnabledConfigs,
+  getLoadedExtensions,
+  registerExtension,
+  updateExtension,
+  disableExtension
 } from '@/api/nodeExtension';
 import { getAllNodes } from '@/api/workflow';
 
@@ -184,14 +209,14 @@ export default {
       extensionList: [],
       nodeList: [], // 节点列表
       tableLoading: false,
-      
+
       // 对话框
       dialogVisible: false,
       loadedDialogVisible: false,
       dialogTitle: '新增SPI扩展',
       isEdit: false,
       saveLoading: false,
-      
+
       // 表单数据
       extensionForm: {
         codeId: null,
@@ -201,24 +226,26 @@ export default {
         className: '',
         sourceCode: '',
         description: '',
-        enabled: 1
+        enabled: 1,
+        extensionMode: 'ONLINE'  // 默认在线扩展（必选）
       },
-      
+            
       // 表单校验规则
       formRules: {
         nodeId: [{ required: true, message: '请选择关联节点', trigger: 'change' }],
         extensionName: [{ required: true, message: '请输入扩展名称', trigger: 'blur' }],
         className: [{ required: true, message: '请输入实现类全名', trigger: 'blur' }],
-        sourceCode: [{ required: true, message: '请输入Java源代码', trigger: 'blur' }]
+        extensionMode: [{ required: true, message: '请选择扩展方式', trigger: 'change' }]
+        // sourceCode 校验将在保存时动态判断（仅在线扩展时必填）
       },
-      
+
       // 已加载的扩展
       loadedExtensionList: [],
-      
+
       // 语法校验
       validationErrors: [],
       activeCollapse: ['errors'],
-      
+
       // 代码模板
       templates: {
         remoteInvoker: `package com.helianhealth.agent.extension;
@@ -231,12 +258,12 @@ import java.util.Map;
  * 自定义远程调用实现示例
  */
 public class CustomInvoker implements InterfaceRemoteInvoker {
-    
+
     @Override
     public Map<String, Object> remoteInvoke(InterfaceWorkflowNode node, Map<String, Object> businessData) {
         // TODO: 实现自定义调用逻辑
         System.out.println("自定义调用: " + node.getNodeName());
-        
+
         return businessData;
     }
 }`
@@ -256,8 +283,8 @@ public class CustomInvoker implements InterfaceRemoteInvoker {
         // 处理响应数据 - 后端返回的是 {code, message, rsp}
         if (response && response.data) {
           const result = response.data;
-          this.extensionList = Array.isArray(result.rsp) ? result.rsp : 
-                               Array.isArray(result.data) ? result.data : 
+          this.extensionList = Array.isArray(result.rsp) ? result.rsp :
+                               Array.isArray(result.data) ? result.data :
                                Array.isArray(result) ? result : [];
         } else {
           this.extensionList = [];
@@ -279,8 +306,8 @@ public class CustomInvoker implements InterfaceRemoteInvoker {
         if (response && response.data) {
           const result = response.data;
           // 支持两种响应格式
-          this.nodeList = Array.isArray(result.rsp) ? result.rsp : 
-                          Array.isArray(result.data) ? result.data : 
+          this.nodeList = Array.isArray(result.rsp) ? result.rsp :
+                          Array.isArray(result.data) ? result.data :
                           Array.isArray(result) ? result : [];
         } else {
           this.nodeList = [];
@@ -299,7 +326,7 @@ public class CustomInvoker implements InterfaceRemoteInvoker {
       if (!this.nodeList || this.nodeList.length === 0) {
         await this.loadNodeList();
       }
-      
+          
       this.dialogTitle = '新增SPI扩展';
       this.isEdit = false;
       this.extensionForm = {
@@ -310,7 +337,8 @@ public class CustomInvoker implements InterfaceRemoteInvoker {
         className: '',
         sourceCode: '',
         description: '',
-        enabled: 1
+        enabled: 1,
+        extensionMode: 'ONLINE'  // 默认在线扩展（必选）
       };
       this.validationErrors = [];
       this.dialogVisible = true;
@@ -325,7 +353,23 @@ public class CustomInvoker implements InterfaceRemoteInvoker {
     handleEdit(row) {
       this.dialogTitle = '编辑SPI扩展';
       this.isEdit = true;
-      this.extensionForm = { ...row };
+      // 处理字段兼容：extensionMode > extensionLocation > usePageCode
+      let mode = row.extensionMode;
+      if (!mode) {
+        // 兼容旧字段 extensionLocation
+        if (row.extensionLocation) {
+          mode = row.extensionLocation;
+        } else if (row.usePageCode !== undefined) {
+          // 兼容更旧的 usePageCode 字段
+          mode = row.usePageCode === 1 ? 'ONLINE' : 'PROJECT';
+        } else {
+          mode = 'ONLINE'; // 默认值
+        }
+      }
+      this.extensionForm = { 
+        ...row,
+        extensionMode: mode
+      };
       this.validationErrors = [];
       this.dialogVisible = true;
       this.$nextTick(() => {
@@ -341,6 +385,25 @@ public class CustomInvoker implements InterfaceRemoteInvoker {
         await this.$refs.extensionForm.validate();
       } catch (error) {
         return;
+      }
+
+      // 必须选择扩展方式
+      if (!this.extensionForm.extensionMode) {
+        Message.error('请选择扩展方式');
+        return;
+      }
+
+      // 如果是在线扩展模式，需要校验 sourceCode
+      if (this.extensionForm.extensionMode === 'ONLINE') {
+        if (!this.extensionForm.sourceCode || !this.extensionForm.sourceCode.trim()) {
+          Message.error('在线扩展模式下，请输入Java源代码');
+          return;
+        }
+      } else {
+        // 项目扩展模式，如果没有代码，设置为空字符串
+        if (!this.extensionForm.sourceCode) {
+          this.extensionForm.sourceCode = '';
+        }
       }
 
       this.saveLoading = true;
@@ -365,15 +428,15 @@ public class CustomInvoker implements InterfaceRemoteInvoker {
     async handleDisable(row) {
       try {
         await MessageBox.confirm(
-          `确定要禁用扩展 "${row.extensionName}" 吗？禁用后将从运行时卸载。`, 
-          '警告', 
+          `确定要禁用扩展 "${row.extensionName}" 吗？禁用后将从运行时卸载。`,
+          '警告',
           {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
             type: 'warning'
           }
         );
-        
+
         await disableExtension(row.codeId);
         Message.success('禁用成功');
         this.loadExtensionList();
@@ -415,7 +478,7 @@ public class CustomInvoker implements InterfaceRemoteInvoker {
     // 语法校验代码
     handleValidateCode() {
       this.validationErrors = [];
-      
+
       if (!this.extensionForm.sourceCode.trim()) {
         Message.warning('请先输入Java代码');
         return;
@@ -423,7 +486,7 @@ public class CustomInvoker implements InterfaceRemoteInvoker {
 
       const errors = [];
       const lines = this.extensionForm.sourceCode.split('\n');
-      
+
       // 检查是否有类定义
       const hasClass = /\b(class|interface|enum)\s+\w+/.test(this.extensionForm.sourceCode);
       if (!hasClass) {
@@ -456,8 +519,8 @@ public class CustomInvoker implements InterfaceRemoteInvoker {
       // 检查分号
       lines.forEach((line, index) => {
         const trimmedLine = line.trim();
-        if (trimmedLine.startsWith('//') || 
-            trimmedLine.startsWith('/*') || 
+        if (trimmedLine.startsWith('//') ||
+            trimmedLine.startsWith('/*') ||
             trimmedLine.startsWith('*') ||
             trimmedLine === '' ||
             trimmedLine === '{' ||
@@ -467,8 +530,8 @@ public class CustomInvoker implements InterfaceRemoteInvoker {
         }
 
         if (trimmedLine.match(/^\s*(private|public|protected|static|final|return|int|String|void|boolean|long|double|float)/)) {
-          if (!trimmedLine.endsWith(';') && 
-              !trimmedLine.endsWith('{') && 
+          if (!trimmedLine.endsWith(';') &&
+              !trimmedLine.endsWith('{') &&
               !trimmedLine.endsWith('}')) {
             errors.push({
               message: '可能缺少分号',
@@ -480,7 +543,7 @@ public class CustomInvoker implements InterfaceRemoteInvoker {
       });
 
       this.validationErrors = errors;
-      
+
       if (errors.length === 0) {
         Message.success('语法校验通过！');
       } else {
@@ -501,7 +564,7 @@ public class CustomInvoker implements InterfaceRemoteInvoker {
 
       lines.forEach(line => {
         const trimmed = line.trim();
-        
+
         if (trimmed.startsWith('}')) {
           indentLevel = Math.max(0, indentLevel - 1);
         }

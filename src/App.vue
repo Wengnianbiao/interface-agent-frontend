@@ -3,15 +3,16 @@
   <div id="app">
     <el-container style="height: 100vh;">
       <!-- 左侧导航栏 -->
-      <el-aside width="200px" style="height: 100%;">
-        <NavHeader />
+      <el-aside :width="isCollapse ? '64px' : '200px'" style="height: 100%; transition: width 0.3s;">
+        <NavHeader :is-collapse="isCollapse" @toggle-collapse="toggleCollapse" />
       </el-aside>
       
       <!-- 主要内容区域 -->
-      <el-container>
-        <!-- <el-header>
-          <h1 style="margin: 0; color: #333;">可配置接口后台</h1>
-        </el-header> -->
+      <el-container style="flex-direction: column;">
+        <!-- 面包屑导航栏 -->
+        <el-header height="auto" style="padding: 0; line-height: 1;">
+          <Breadcrumb />
+        </el-header>
         
         <el-main>
           <router-view />
@@ -22,12 +23,24 @@
 </template>
 
 <script>
-import NavHeader from './components/Navbar.vue'; 
+import NavHeader from './components/Navbar.vue';
+import PageBreadcrumb from './components/Breadcrumb.vue';
 
 export default {
   name: 'App',
   components: {
-    NavHeader
+    NavHeader,
+    Breadcrumb: PageBreadcrumb
+  },
+  data() {
+    return {
+      isCollapse: false // 侧边栏是否折叠
+    };
+  },
+  methods: {
+    toggleCollapse() {
+      this.isCollapse = !this.isCollapse;
+    }
   }
 };
 </script>
@@ -37,19 +50,31 @@ export default {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
-  margin-top: 0;
-  height: 100%;
+  height: 100vh;
+  overflow: hidden;
 }
 
-/* 为工作流组件添加顶部边距，避免被导航栏遮挡 */
-.workflow-list {
-  margin-top: 60px;
+body {
+  margin: 0;
+  padding: 0;
 }
 
 /* 确保容器高度正确 */
 .el-container {
   height: 100%;
+}
+
+/* 移除 el-header 默认样式 */
+.el-header {
+  padding: 0 !important;
+  margin: 0;
+  line-height: 1;
+}
+
+/* 主内容区域滚动 */
+.el-main {
+  overflow-y: auto;
+  padding-top: 0;
 }
 </style>

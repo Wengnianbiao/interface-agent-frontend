@@ -1,7 +1,5 @@
 <template>
   <div class="mock-invoke">
-    <h2>Mock调用测试</h2>
-
     <el-card class="invoke-card">
       <el-form 
         :model="form" 

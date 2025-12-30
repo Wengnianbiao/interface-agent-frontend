@@ -1,7 +1,5 @@
 <template>
   <div class="workflow-node-list">
-    <h2>工作流节点</h2>
-
     <!-- 筛选区域 -->
     <div style="margin-bottom: 10px; background-color: #f5f7fa; padding: 20px; border-radius: 4px;">
       <div style="display: flex; justify-content: center; align-items: center; gap: 20px;">
@@ -143,17 +141,6 @@
 
         <el-form-item label="参数过滤表达式" prop="paramFilterExpr">
           <el-input v-model="form.paramFilterExpr" placeholder="请输入参数过滤表达式"></el-input>
-        </el-form-item>
-
-        <el-form-item label="调度表达式" prop="scheduleExpr">
-          <el-input v-model="form.scheduleExpr" placeholder="请输入调度表达式"></el-input>
-        </el-form-item>
-
-        <el-form-item label="调度参数类型" prop="scheduleParamSourceType">
-          <el-select v-model="form.scheduleParamSourceType" placeholder="请选择调度参数类型" clearable>
-            <el-option label="原始入参" value="ORIGINAL"></el-option>
-            <el-option label="当前节点响应" value="PRE_RESPONSE"></el-option>
-          </el-select>
         </el-form-item>
       </el-form>
 

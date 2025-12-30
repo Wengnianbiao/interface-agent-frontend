@@ -1,7 +1,5 @@
 <template>
   <div class="jarvis-templates">
-    <h2>Jarvis入参模板</h2>
-    
     <el-alert
       title="模板说明"
       type="info"

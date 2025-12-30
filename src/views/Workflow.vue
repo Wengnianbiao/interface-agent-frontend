@@ -1,7 +1,5 @@
 <template>
   <div class="workflow-list">
-    <h2>工作流管理</h2>
-
     <!-- 操作按钮区 -->
     <div style="margin-bottom: 10px; text-align: right;">
       <el-button type="success" @click="handleAdd">新增</el-button>

@@ -1,34 +1,34 @@
 <template>
   <div class="node-param-config">
-    <h2>节点参数配置</h2>
-
     <!-- 搜索条件 -->
-    <el-form :inline="true" :model="searchForm" class="search-form">
-      <el-form-item label="节点">
-        <el-select v-model="searchForm.nodeId" placeholder="请选择节点" clearable>
-          <el-option label="全部" value=""></el-option>
-          <el-option v-for="node in nodeOptions" :key="node.nodeId" :label="node.nodeName" :value="node.nodeId"></el-option>
-        </el-select>
-      </el-form-item>
+    <div style="margin-bottom: 20px; background-color: #f5f7fa; padding: 20px; border-radius: 4px;">
+      <el-form :inline="true" :model="searchForm" style="display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;">
+        <el-form-item label="节点">
+          <el-select v-model="searchForm.nodeId" placeholder="请选择节点" clearable>
+            <el-option label="全部" value=""></el-option>
+            <el-option v-for="node in nodeOptions" :key="node.nodeId" :label="node.nodeName" :value="node.nodeId"></el-option>
+          </el-select>
+        </el-form-item>
 
-      <el-form-item label="处理类型">
-        <el-select v-model="searchForm.processType" placeholder="请选择处理类型" clearable>
-          <el-option label="前置处理" value="PRE_PROCESS"></el-option>
-          <el-option label="后置处理" value="POST_PROCESS"></el-option>
-        </el-select>
-      </el-form-item>
+        <el-form-item label="处理类型">
+          <el-select v-model="searchForm.processType" placeholder="请选择处理类型" clearable>
+            <el-option label="前置处理" value="PRE_PROCESS"></el-option>
+            <el-option label="后置处理" value="POST_PROCESS"></el-option>
+          </el-select>
+        </el-form-item>
 
-      <!-- 新增的targetParam搜索框 -->
-      <el-form-item label="目标参数名">
-        <el-input v-model="searchForm.targetParam" placeholder="请输入目标参数名" clearable></el-input>
-      </el-form-item>
+        <!-- 新增的targetParam搜索框 -->
+        <el-form-item label="目标参数名">
+          <el-input v-model="searchForm.targetParam" placeholder="请输入目标参数名" clearable></el-input>
+        </el-form-item>
 
-      <el-form-item>
-        <el-button type="primary" @click="handleSearch">查询</el-button>
-        <el-button @click="handleReset">重置</el-button>
-        <el-button type="success" @click="handleAdd">新增</el-button>
-      </el-form-item>
-    </el-form>
+        <el-form-item>
+          <el-button type="primary" @click="handleSearch">查询</el-button>
+          <el-button @click="handleReset">重置</el-button>
+          <el-button type="success" @click="handleAdd">新增</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
 
     <!-- 参数配置表格 -->
     <el-table :data="configList" style="width: 100%" v-loading="loading">
